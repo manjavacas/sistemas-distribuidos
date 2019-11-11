@@ -1,0 +1,10 @@
+
+=============== RUN CLIENT ===============
+
+$ ./client.py <proxy> <file-url>
+
+=============== RUN SERVER ===============
+
+$ ./orchestrator.py
+
+$ ./downloader.py
