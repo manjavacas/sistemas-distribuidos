@@ -5,6 +5,6 @@ $ ./client.py <proxy> <file-url>
 
 =============== RUN SERVER ===============
 
-$ ./orchestrator.py
+$ ./orchestrator.py --Ice.Config=Server.config
 
-$ ./downloader.py
+$ ./downloader.py --Ice.Config=Server.config
