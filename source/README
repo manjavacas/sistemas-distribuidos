@@ -1,10 +1,7 @@
 
 =============== RUN CLIENT ===============
 
-$ ./client.py <proxy> <file-url>
+
 
 =============== RUN SERVER ===============
 
-$ ./orchestrator.py --Ice.Config=Server.config
-
-$ ./downloader.py --Ice.Config=Server.config
