@@ -26,7 +26,7 @@ class Client(Ice.Application):
         orchestrator = TrawlNet.OrchestratorPrx.checkedCast(proxy)
 
         if not orchestrator:
-            raise RuntimeError('[CLIENT] error: invalid proxy')
+            raise RuntimeError('[CLIENT] error: invalid orchestrator proxy')
 
         print('[CLIENT] sending URL to {0}...'.format(argv[2]))
         orchestrator.downloadTask(argv[2])
@@ -34,8 +34,8 @@ class Client(Ice.Application):
         return 0
 
 
-if len(sys.argv) != 3:
-    print('[CLIENT] usage: client.py <proxy> <file-url>')
+if len(sys.argv) != 4:
+    print('[CLIENT] usage: client.py <orchestrator-proxy> <file-url> --Ice.Config=Client.config')
     exit()
 
 CLIENT = Client()

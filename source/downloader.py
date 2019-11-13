@@ -29,7 +29,7 @@ class DownloaderServer(Ice.Application):
         adapter = broker.createObjectAdapter("DownloaderAdapter")
         proxy = adapter.add(servant, broker.stringToIdentity("downloader1"))
 
-        print('[DOWNLOADER] showing proxy...\n{0}'.format(proxy))
+        print(proxy, flush=True)
 
         adapter.activate()
         self.shutdownOnInterrupt()
@@ -42,7 +42,7 @@ class DownloaderI(TrawlNet.Downloader):
     '''
     Downloader servant
     '''
-    
+
     n = 0
 
     def addDownloadTask(self, url, current=None):
@@ -53,6 +53,9 @@ class DownloaderI(TrawlNet.Downloader):
 
         return 0
 
+if len(sys.argv) != 2:
+    print('[DOWNLOADER] usage: downloader.py --Ice.Config=Downloader.config')
+    exit()
 
 SERVER = DownloaderServer()
 sys.exit(SERVER.main(sys.argv))

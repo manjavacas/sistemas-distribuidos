@@ -15,19 +15,29 @@ import TrawlNet
 __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
-'''
-    Download request receiver
-'''
+
 class OrchestratorServer(Ice.Application):
+    '''
+    Download request receiver
+    '''
+
     def run(self, argv):
 
         broker = self.communicator()
         servant = OrchestratorI()
 
         adapter = broker.createObjectAdapter("OrchestratorAdapter")
-        proxy = adapter.add(servant, broker.stringToIdentity("orchestrator1"))
+        orchestrator_proxy = adapter.add(servant, broker.stringToIdentity("orchestrator1"))
 
-        print('[ORCHESTRATOR] showing proxy...\n{0}'.format(proxy))
+        print(orchestrator_proxy)
+        
+        downloader_proxy = broker.stringToProxy(argv[1])
+        downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
+
+        if not downloader:
+            raise RuntimeError('[ORCHESTRATOR] error: invalid downloader proxy')
+
+        servant.downloader = downloader
 
         adapter.activate()
         self.shutdownOnInterrupt()
@@ -36,28 +46,29 @@ class OrchestratorServer(Ice.Application):
         return 0
 
 
-'''
-    Orchestrator servant
-'''
 class OrchestratorI(TrawlNet.Orchestrator):
+    '''
+    Orchestrator servant
+    '''
 
     n = 0
+    downloader = None
 
     def downloadTask(self, url, current=None):
-        
-        print('[ORCHESTRATOR] receives download task {0}: {1}'.format(self.n, url))
+
+        print('[ORCHESTRATOR] receives download task {0}: {1}'.format(
+            self.n, url))
         sys.stdout.flush()
         self.n += 1
-
-        proxy = self.communicator().stringToProxy("PROXY_DOWNLOADER") # CHECK -> proxy & communicator
-        downloader = TrawlNet.DownloaderPrx.checkedCast(proxy)
-
-        if not downloader:
-            raise RuntimeError('[ORCHESTRATOR] error: invalid proxy')
 
         print('[ORCHESTRATOR] sending task to downloader...')
         downloader.addDownloadTask(url)
         return 0
+
+
+if len(sys.argv) != 3:
+    print('[ORCHESTRATOR] usage: orchestrator.py <downloader-proxy> --Ice.Config=Orchestrator.config')
+    exit()
 
 SERVER = OrchestratorServer()
 sys.exit(SERVER.main(sys.argv))

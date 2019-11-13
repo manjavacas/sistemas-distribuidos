@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./client.py $1 $2
+./client.py "$(cat orchestrator.proxy)" $1 --Ice.Config=Client.config
