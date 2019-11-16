@@ -1,10 +1,10 @@
 
 Message flow:
 
-------------                  ------------------                 --------------
-|  CLIENT  |  <-------------> |  ORCHESTRATOR  |  <------------> | DOWNLOADER |
-------------                  ------------------                 --------------
+    ------------                  ------------------                 --------------
+    |  CLIENT  |  <-------------> |  ORCHESTRATOR  |  <------------> | DOWNLOADER |
+    ------------                  ------------------                 --------------
 
-1. Client sends task to Orchestrator
-2. Orchestrator manage task and sends it to downloader
-3. Downloader receives the task and download the file
+    1. Client sends task to Orchestrator
+    2. Orchestrator manage task and sends it to downloader
+    3. Downloader receives the task and download the file
