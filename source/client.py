@@ -12,6 +12,7 @@ import Ice
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
 
+
 __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
@@ -28,15 +29,18 @@ class Client(Ice.Application):
         if not orchestrator:
             raise RuntimeError('[CLIENT] error: invalid orchestrator proxy')
 
-        print('[CLIENT] sending URL to {0}...'.format(argv[2]))
+        print('[CLIENT] sending URL to {0}...'.format(argv[1]))
         orchestrator.downloadTask(argv[2])
 
         return 0
 
 
-if len(sys.argv) != 4:
-    print('[CLIENT] usage: client.py <orchestrator-proxy> <file-url> --Ice.Config=Client.config')
-    exit()
+if __name__ == '__main__':
 
-CLIENT = Client()
-sys.exit(CLIENT.main(sys.argv))
+    if len(sys.argv) != 4:
+        print(
+            '[CLIENT] usage: client.py <orchestrator-proxy> <file-url> --Ice.Config=Client.config')
+        exit()
+
+    CLIENT = Client()
+    sys.exit(CLIENT.main(sys.argv))

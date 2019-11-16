@@ -12,6 +12,7 @@ import Ice
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
 
+
 __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
@@ -26,16 +27,18 @@ class OrchestratorServer(Ice.Application):
         broker = self.communicator()
         servant = OrchestratorI()
 
-        adapter = broker.createObjectAdapter("OrchestratorAdapter")
-        orchestrator_proxy = adapter.add(servant, broker.stringToIdentity("orchestrator1"))
+        adapter = broker.createObjectAdapter("ObjectAdapter")
+        orchestrator_proxy = adapter.add(
+            servant, broker.stringToIdentity("orchestrator1"))
 
-        print(orchestrator_proxy)
+        print(orchestrator_proxy, flush=True)
         
         downloader_proxy = broker.stringToProxy(argv[1])
         downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
 
         if not downloader:
-            raise RuntimeError('[ORCHESTRATOR] error: invalid downloader proxy')
+            raise RuntimeError(
+                '[ORCHESTRATOR] error: invalid downloader proxy')
 
         servant.downloader = downloader
 
@@ -51,24 +54,26 @@ class OrchestratorI(TrawlNet.Orchestrator):
     Orchestrator servant
     '''
 
-    n = 0
-    downloader = None
+    def __init__(self):
+        self.n = 0
+        self.downloader = None
 
     def downloadTask(self, url, current=None):
 
         print('[ORCHESTRATOR] receives download task {0}: {1}'.format(
             self.n, url))
-        sys.stdout.flush()
         self.n += 1
 
         print('[ORCHESTRATOR] sending task to downloader...')
-        downloader.addDownloadTask(url)
+        self.downloader.addDownloadTask(url)
         return 0
 
 
-if len(sys.argv) != 3:
-    print('[ORCHESTRATOR] usage: orchestrator.py <downloader-proxy> --Ice.Config=Orchestrator.config')
-    exit()
+if __name__ == '__main__':
 
-SERVER = OrchestratorServer()
-sys.exit(SERVER.main(sys.argv))
+    if len(sys.argv) != 3:
+        print('[ORCHESTRATOR] usage: orchestrator.py <downloader-proxy> --Ice.Config=Orchestrator.config')
+        exit()
+
+    SERVER = OrchestratorServer()
+    sys.exit(SERVER.main(sys.argv))

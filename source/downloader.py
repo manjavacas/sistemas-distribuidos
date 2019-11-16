@@ -12,6 +12,7 @@ import Ice
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
 
+
 __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
@@ -26,7 +27,7 @@ class DownloaderServer(Ice.Application):
         broker = self.communicator()
         servant = DownloaderI()
 
-        adapter = broker.createObjectAdapter("DownloaderAdapter")
+        adapter = broker.createObjectAdapter("ObjectAdapter")
         proxy = adapter.add(servant, broker.stringToIdentity("downloader1"))
 
         print(proxy, flush=True)
@@ -43,19 +44,22 @@ class DownloaderI(TrawlNet.Downloader):
     Downloader servant
     '''
 
-    n = 0
+    def __init__(self):
+        self.n = 0
 
     def addDownloadTask(self, url, current=None):
 
         print('[DOWNLOADER] adds download task {0}: {1}'.format(self.n, url))
-        sys.stdout.flush()
         self.n += 1
 
         return 0
 
-if len(sys.argv) != 2:
-    print('[DOWNLOADER] usage: downloader.py --Ice.Config=Downloader.config')
-    exit()
 
-SERVER = DownloaderServer()
-sys.exit(SERVER.main(sys.argv))
+if __name__ == '__main__':
+
+    if len(sys.argv) != 2:
+        print('[DOWNLOADER] usage: downloader.py --Ice.Config=Downloader.config')
+        exit()
+
+    SERVER = DownloaderServer()
+    sys.exit(SERVER.main(sys.argv))
