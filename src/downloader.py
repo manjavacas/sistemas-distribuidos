@@ -27,11 +27,11 @@ class DownloaderServer(Ice.Application):
         broker = self.communicator()
         servant = DownloaderI()
 
-        adapter = broker.createObjectAdapter("ObjectAdapter")
+        adapter = broker.createObjectAdapter("DownloaderAdapter")
         proxy = adapter.add(servant, broker.stringToIdentity("downloader1"))
 
         print(proxy, flush=True)
-
+        
         adapter.activate()
         self.shutdownOnInterrupt()
         broker.waitForShutdown()

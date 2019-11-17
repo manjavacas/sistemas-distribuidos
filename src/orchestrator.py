@@ -27,7 +27,7 @@ class OrchestratorServer(Ice.Application):
         broker = self.communicator()
         servant = OrchestratorI()
 
-        adapter = broker.createObjectAdapter("ObjectAdapter")
+        adapter = broker.createObjectAdapter("OrchestratorAdapter")
         orchestrator_proxy = adapter.add(
             servant, broker.stringToIdentity("orchestrator1"))
 
