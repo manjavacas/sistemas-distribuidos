@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Client for sending requests to download videos
+Client for sending requests to download videos
 '''
 
 # Libs
@@ -23,13 +23,16 @@ class Client(Ice.Application):
     '''
 
     def run(self, argv):
+        '''
+        Run method
+        '''
         proxy = self.communicator().stringToProxy(argv[1])
         orchestrator = TrawlNet.OrchestratorPrx.checkedCast(proxy)
 
         if not orchestrator:
             raise RuntimeError('[CLIENT] error: invalid orchestrator proxy')
 
-        print('[CLIENT] sending URL to {0}...'.format(argv[1]))
+        print('[CLIENT] sending URL {0} to {1}...'.format(argv[2], argv[1]))
         orchestrator.downloadTask(argv[2])
 
         return 0
@@ -39,7 +42,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) != 4:
         print(
-            '[CLIENT] usage: client.py <orchestrator-proxy> <file-url> --Ice.Config=Client.config')
+            '[CLIENT] usage: client.py <orchestrator_proxy> <file_url> --Ice.Config=Client.config')
         exit()
 
     CLIENT = Client()

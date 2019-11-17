@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Youtube video downloader
+Youtube video downloader
 '''
 
 # Libs
@@ -23,6 +23,9 @@ class DownloaderServer(Ice.Application):
     '''
 
     def run(self, argv):
+        '''
+        Run method
+        '''
 
         broker = self.communicator()
         servant = DownloaderI()
@@ -31,7 +34,7 @@ class DownloaderServer(Ice.Application):
         proxy = adapter.add(servant, broker.stringToIdentity("downloader1"))
 
         print(proxy, flush=True)
-        
+
         adapter.activate()
         self.shutdownOnInterrupt()
         broker.waitForShutdown()
@@ -45,14 +48,20 @@ class DownloaderI(TrawlNet.Downloader):
     '''
 
     def __init__(self):
+        '''
+        Class constructor
+        '''
         self.n = 0
 
     def addDownloadTask(self, url, current=None):
+        '''
+        Adds a download task from an url
+        '''
 
         print('[DOWNLOADER] adds download task {0}: {1}'.format(self.n, url))
         self.n += 1
 
-        return 0
+        return 'ok'
 
 
 if __name__ == '__main__':

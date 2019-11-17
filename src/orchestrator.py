@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Orchestrator for the management of download requests
+Orchestrator for the management of download requests
 '''
 
 # Libs
@@ -23,6 +23,9 @@ class OrchestratorServer(Ice.Application):
     '''
 
     def run(self, argv):
+        '''
+        Run method
+        '''
 
         broker = self.communicator()
         servant = OrchestratorI()
@@ -55,10 +58,16 @@ class OrchestratorI(TrawlNet.Orchestrator):
     '''
 
     def __init__(self):
+        '''
+        Class constructor
+        '''
         self.n = 0
         self.downloader = None
 
     def downloadTask(self, url, current=None):
+        '''
+        Sends a download task to a downloader
+        '''
 
         print('[ORCHESTRATOR] receives download task {0}: {1}'.format(
             self.n, url))
@@ -66,13 +75,14 @@ class OrchestratorI(TrawlNet.Orchestrator):
 
         print('[ORCHESTRATOR] sending task to downloader...')
         self.downloader.addDownloadTask(url)
-        return 0
+        
+        return 'ok'
 
 
 if __name__ == '__main__':
 
     if len(sys.argv) != 3:
-        print('[ORCHESTRATOR] usage: orchestrator.py <downloader-proxy> --Ice.Config=Orchestrator.config')
+        print('[ORCHESTRATOR] usage: orchestrator.py <downloader_proxy> --Ice.Config=Orchestrator.config')
         exit()
 
     SERVER = OrchestratorServer()
