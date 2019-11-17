@@ -1,10 +1,20 @@
 
-Message flow:
+ ############ RUN CLIENT ############
+
+    $ ./run_client
+
+ ############ RUN ORCHESTRATOR & DOWNLOADER ############
+
+    $ ./run_server
+
+---------------------------------------------------
+
+    Message flow:
 
     ------------                  ------------------                 --------------
     |  CLIENT  |  <-------------> |  ORCHESTRATOR  |  <------------> | DOWNLOADER |
     ------------                  ------------------                 --------------
 
     1. Client sends task to Orchestrator
-    2. Orchestrator manage task and sends it to downloader
-    3. Downloader receives the task and download the file
+    2. Orchestrator manages the task and sends it to Downloader
+    3. Downloader receives the task and downloads the file
