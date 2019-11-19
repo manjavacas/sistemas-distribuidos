@@ -34,7 +34,7 @@ class OrchestratorServer(Ice.Application):
         orchestrator_proxy = adapter.add(
             servant, broker.stringToIdentity("orchestrator1"))
 
-        # Save proxy
+        # Show proxy
         print(orchestrator_proxy, flush=True)
         
         downloader_proxy = broker.stringToProxy(argv[1])
