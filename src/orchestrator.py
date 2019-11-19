@@ -34,7 +34,10 @@ class OrchestratorServer(Ice.Application):
         orchestrator_proxy = adapter.add(
             servant, broker.stringToIdentity("orchestrator1"))
 
-        print(orchestrator_proxy, flush=True)
+        # Save proxy
+        proxy_file = open('orchestrator.proxy','w')
+        print(orchestrator_proxy, file = proxy_file)
+        proxy_file.close()
         
         downloader_proxy = broker.stringToProxy(argv[1])
         downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
