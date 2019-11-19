@@ -33,10 +33,8 @@ class DownloaderServer(Ice.Application):
         adapter = broker.createObjectAdapter("DownloaderAdapter")
         proxy = adapter.add(servant, broker.stringToIdentity("downloader1"))
 
-        # Save proxy
-        proxy_file = open('downloader.proxy','w')
-        print(proxy, file = proxy_file)
-        proxy_file.close()
+        # Show proxy
+        print(proxy, flush=True)
 
         adapter.activate()
         self.shutdownOnInterrupt()
