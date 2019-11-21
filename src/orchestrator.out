@@ -1,3 +1,0 @@
-orchestrator1 -t -e 1.1 @ orchestrator
-[ORCHESTRATOR] receives download task 0: https://www.youtube.com/watch?v=W1b1laUX_hc
-[ORCHESTRATOR] sending task to downloader...
