@@ -8,6 +8,7 @@ Orchestrator for the management of download requests
 # Libs
 import sys
 import Ice
+import IceStorm
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -17,7 +18,7 @@ __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
 
-class OrchestratorServer(Ice.Application):
+class Orchestrator(Ice.Application):
     '''
     Download request receiver
     '''
@@ -86,5 +87,5 @@ if __name__ == '__main__':
         print('[ORCHESTRATOR] usage: orchestrator.py <downloader_proxy> --Ice.Config=Orchestrator.config')
         exit()
 
-    SERVER = OrchestratorServer()
-    sys.exit(SERVER.main(sys.argv))
+    orchestrator = Orchestrator()
+    sys.exit(orchestrator.main(sys.argv))

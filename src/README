@@ -1,22 +1,13 @@
 
-# Run Orchestrator and Downloader
+# Run orchestrator and downloader
+# (including icegridregistry and icebox):
 
     $ ./run_server
     
-# Run Client
+# Run client to get the list of files:
 
     $ ./run_client
 
-===============================================================================================
+# Run client to download file:
 
-    Message flow:
-
-    ------------                  ------------------                 --------------
-    |  CLIENT  |  <-------------> |  ORCHESTRATOR  |  <------------> | DOWNLOADER |
-    ------------                  ------------------                 --------------
-
-    1. Client sends task to Orchestrator
-    2. Orchestrator manages the task and sends it to Downloader
-    3. Downloader receives the task and downloads the file
-
-===============================================================================================
+    $ ./run_client <youtube-url>
