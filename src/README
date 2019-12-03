@@ -1,6 +1,5 @@
 
-# Run orchestrator and downloader
-# (including icegridregistry and icebox):
+# Run orchestrator and downloader (including icegridregistry and icebox):
 
     $ ./run_server
     
