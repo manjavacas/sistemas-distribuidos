@@ -29,11 +29,10 @@ class Orchestrator(Ice.Application):
         '''
 
         broker = self.communicator()
+        
         servant = OrchestratorI()
-
         adapter = broker.createObjectAdapter("OrchestratorAdapter")
-        orchestrator_proxy = adapter.add(
-            servant, broker.stringToIdentity("orchestrator1"))
+        orchestrator_proxy = adapter.addWithUUID(servant)
 
         # Show proxy
         print(orchestrator_proxy, flush=True)
