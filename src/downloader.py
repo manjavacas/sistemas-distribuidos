@@ -7,6 +7,7 @@ Youtube video downloader
 
 # Libs
 import sys
+import hashlib
 import Ice
 import IceStorm
 import os
@@ -41,16 +42,23 @@ class Downloader(Ice.Application):
         '''
 
         broker = self.communicator()
-        servant_downloader = DownloaderI()
 
+        # Downloader
+        servant_downloader = DownloaderI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
         downloader_proxy = adapter.add(
             servant_downloader, broker.stringToIdentity('downloader1'))
 
+        # Updater
+        servant_updater = UpdateEventI()
+        broker.createObjectAdapter('UpdaterAdapter')
+        updater_proxy = adapter.add(
+            servant_updater, broker.stringToIdentity('updater1'))
+
         # Show proxy
         print(downloader_proxy, flush=True)
 
-        ########## PUBLISHER ##########
+        # UpdateEvents topic
         topic_mgr = self.get_topic_manager()
 
         if not topic_mgr:
@@ -63,8 +71,8 @@ class Downloader(Ice.Application):
             print('[DOWNLOADER] No such topic found, creating...')
             topic = topic_mgr.create(topic_name)
 
-        publisher = topic.getPublisher()
-        servant_downloader.publisher = publisher
+        # Set publisher
+        servant_updater.publisher = topic.getPublisher()
 
         adapter.activate()
         self.shutdownOnInterrupt()
@@ -78,33 +86,43 @@ class DownloaderI(TrawlNet.Downloader):
     Downloader servant
     '''
 
-    publisher = None
-
-    def __init__(self):
-        '''
-        Class constructor
-        '''
-        self.n = 0
-
     def addDownloadTask(self, url, current=None):
         '''
         Adds a download task from an url
         '''
 
-        print('[DOWNLOADER] processing download task {0}: {1}'.format(
-            self.n, url))
-        self.n += 1
+        print('[DOWNLOADER] processing download task: {0}'.format(url))
 
-        file_data = download_mp3(url)
+        try:
+            audio=download_mp3(url)
+        except:
+            raise RuntimeError('[DOWNLOADER] Error in audio download')
 
-        if not publisher:
+        file_info=TrawlNet.FileInfo()
+        file_info.name=os.path.basename(audio)
+        file_info.hash=hashlib.sha256(file_info.name.encode()).hexdigest()
+
+        return file_info
+
+class UpdateEventI(TrawlNet.UpdateEvent):
+    '''
+    Class for publishing in UpdateEvents topic
+    '''
+
+    def __init__(self):
+        '''
+        Class constructor
+        '''
+        self.publisher=None
+
+    def newFile(self, file_info):
+        '''
+        Notify new file in channel
+        '''
+        if not self.publisher:
             raise RuntimeError('[ÐOWNLOADER] Error getting publisher')
-
-        updater = TrawlNet.UpdateEventPrx.checkedCast(publisher)
-        updater.newFile(file_data)
-
-        return file_data
-
+        
+        print('¡NEW FILE!')
 
 class NullLogger:
     '''
@@ -121,7 +139,7 @@ class NullLogger:
         pass
 
 
-_YOUTUBEDL_OPTS_ = {
+_YOUTUBEDL_OPTS_={
     'format': 'bestaudio/best',
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
@@ -132,31 +150,27 @@ _YOUTUBEDL_OPTS_ = {
 }
 
 
-def download_mp3(url, destination='./'):
+def download_mp3(url, destination='./downloads'):
     '''
     Synchronous download from YouTube
     '''
-    options = {}
-    task_status = {}
+    options={}
+    task_status={}
 
     def progress_hook(status):
         task_status.update(status)
     options.update(_YOUTUBEDL_OPTS_)
-    options['progress_hooks'] = [progress_hook]
-    options['outtmpl'] = os.path.join(destination, '%(title)s.%(ext)s')
+    options['progress_hooks']=[progress_hook]
+    options['outtmpl']=os.path.join(destination, '%(title)s.%(ext)s')
     with youtube_dl.YoutubeDL(options) as youtube:
         youtube.download([url])
-    filename = task_status['filename']
+    filename=task_status['filename']
     # BUG: filename extension is wrong, it must be mp3
-    filename = filename[:filename.rindex('.') + 1]
+    filename=filename[:filename.rindex('.') + 1]
     return filename + options['postprocessors'][0]['preferredcodec']
 
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 2:
-        print('[DOWNLOADER] usage: downloader.py --Ice.Config=Downloader.config')
-        exit()
-
-    downloader = Downloader()
+    downloader=Downloader()
     sys.exit(downloader.main(sys.argv))

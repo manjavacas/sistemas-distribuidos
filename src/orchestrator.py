@@ -63,22 +63,20 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         Class constructor
         '''
-        self.n = 0
         self.downloader = None
 
     def downloadTask(self, url, current=None):
         '''
         Sends a download task to a downloader
         '''
-
-        print('[ORCHESTRATOR] receives download task {0}: {1}'.format(
-            self.n, url))
-        self.n += 1
+        
+        print('[ORCHESTRATOR] receives download task {0}:'.format(url))
 
         print('[ORCHESTRATOR] sending task to downloader...')
-        self.downloader.addDownloadTask(url)
         
-        return 'ok'
+        file_data = self.downloader.addDownloadTask(url)
+        
+        return file_data
 
 
 if __name__ == '__main__':
