@@ -1,5 +1,3 @@
-// Trawlent 2nd phase: syncing and downloading
-
 module TrawlNet {
   exception DownloadError {
       string reason;
