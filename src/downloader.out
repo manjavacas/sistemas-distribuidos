@@ -1,3 +1,4 @@
-B252C87C-1B1F-4400-8C64-B9B6E4C4BA6E -t -e 1.1:tcp -h 192.168.1.126 -p 46803 -t 60000
+E61F5904-723D-40A0-8895-53D2190BDB4A -t -e 1.1:tcp -h 192.168.1.126 -p 36227 -t 60000
 Using IceStorm in: IceStorm.TopicManager.Proxy 
-[DOWNLOADER] processing download task: https://www.youtube.com/watch?v=SSbBvKaM6sk
+[DOWNLOADER] No such topic found, creating...
+[DOWNLOADER] Received download task: https://www.youtube.com/watch?v=SSbBvKaM6sk
