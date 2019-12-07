@@ -9,6 +9,7 @@ Orchestrator for the management of download requests
 import sys
 import Ice
 import IceStorm
+import json
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -28,6 +29,17 @@ class Orchestrator(Ice.Application):
         '''
         self.files = {}
 
+    def get_topic_manager(self):
+        key = 'IceStorm.TopicManager.Proxy'
+        proxy = self.communicator().propertyToProxy(key)
+
+        if proxy is None:
+            print('[ORCHESTRATOR] Error: topic key not set')
+            return None
+
+        print('[ORCHESTRATOR] Using IceStorm in: {0}'.format(key))
+        return IceStorm.TopicManagerPrx.checkedCast(proxy)
+
     def run(self, argv):
         '''
         Run method
@@ -35,19 +47,15 @@ class Orchestrator(Ice.Application):
 
         broker = self.communicator()
 
+        # Tasker
         servant_orchestrator = OrchestratorI()
         adapter = broker.createObjectAdapter("OrchestratorAdapter")
         orchestrator_proxy = adapter.addWithUUID(servant_orchestrator)
 
-        # Updater
-        servant_updater = UpdateEventI()
-        servant_updater.orchestrator = self
-        broker.createObjectAdapter('UpdaterAdapter')
-        adapter.addWithUUID(servant_updater)
-
         # Show proxy
         print(orchestrator_proxy, flush=True)
 
+        # Set class attributes
         downloader_proxy = broker.stringToProxy(argv[1])
         downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
 
@@ -56,6 +64,28 @@ class Orchestrator(Ice.Application):
                 '[ORCHESTRATOR] Error: invalid downloader proxy')
 
         servant_orchestrator.downloader = downloader
+        servant_orchestrator.orchestrator = self
+
+        # Updater
+        servant_updater = UpdateEventI()
+        servant_updater.orchestrator = self
+        broker.createObjectAdapter('UpdaterAdapter')
+        updater_subscriber = adapter.addWithUUID(servant_updater)
+
+        # Subscribe to file update events topic
+        topic_mgr = self.get_topic_manager()
+        if not topic_mgr:
+            raise RuntimeError('[ORCHESTRATOR] Error getting topic manager')
+
+        topic_name = 'UpdateEvents'
+        qos = {}
+
+        try:
+            topic = topic_mgr.retrieve(topic_name)
+        except IceStorm.NoSuchTopic:
+            topic = topic_mgr.create(topic_name)
+
+        topic.subscribeAndGetPublisher(qos, updater_subscriber)
 
         adapter.activate()
         self.shutdownOnInterrupt()
@@ -74,6 +104,7 @@ class OrchestratorI(TrawlNet.Orchestrator):
         Class constructor
         '''
         self.downloader = None
+        self.orchestrator = None
 
     def downloadTask(self, url, current=None):
         '''
@@ -81,12 +112,17 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
 
         print('[ORCHESTRATOR] receives download task {0}:'.format(url))
-
         print('[ORCHESTRATOR] sending task to downloader...')
 
         file_data = self.downloader.addDownloadTask(url)
 
         return file_data
+
+    def getFileList(self):
+        return json.dumps(self.orchestrator.files)
+
+    def announce(self):
+        raise NotImplementedError
 
 
 class UpdateEventI(TrawlNet.UpdateEvent):
@@ -107,19 +143,15 @@ class UpdateEventI(TrawlNet.UpdateEvent):
         '''
 
         if not self.orchestrator:
-            raise RuntimeError('[ÐOWNLOADER] Error getting orchestrator')
+            raise RuntimeError('[UPDATER] Error getting orchestrator')
 
         if file_info.hash not in self.orchestrator.files:
-            print('[DOWNLOADER] New file named {0}, with hash = {1}'.format(
+            print('[UPDATER] New file named {0}, with hash = {1}'.format(
                 file_info.name, file_info.hash))
-            self.orchestrator.files[fileHash] = file_info.name
+            self.orchestrator.files[file_info.hash] = file_info.name
 
 
 if __name__ == '__main__':
-
-    if len(sys.argv) != 3:
-        print('[ORCHESTRATOR] usage: orchestrator.py <downloader_proxy> --Ice.Config=Orchestrator.config')
-        exit()
 
     orchestrator = Orchestrator()
     sys.exit(orchestrator.main(sys.argv))

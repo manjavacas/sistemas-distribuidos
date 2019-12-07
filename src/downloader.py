@@ -58,7 +58,7 @@ class Downloader(Ice.Application):
         # Show proxy
         print(downloader_proxy, flush=True)
 
-        # UpdateEvents topic
+        # Publish in file update events topic
         topic_mgr = self.get_topic_manager()
 
         if not topic_mgr:
@@ -105,18 +105,24 @@ class DownloaderI(TrawlNet.Downloader):
         try:
             audio = download_mp3(url)
         except:
-            raise RuntimeError('[DOWNLOADER] Error in audio download')
+            raise DownloadError('[DOWNLOADER] Error in audio download')
 
         file_info = TrawlNet.FileInfo()
         file_info.name = os.path.basename(audio)
         file_info.hash = hashlib.sha256(file_info.name.encode()).hexdigest()
 
         if not self.updater:
-            raise RuntimeError('[ÐOWNLOADER] Error getting publisher')
+            raise DownloadError('[ÐOWNLOADER] Error getting publisher')
 
         self.updater.newFile(file_info)
 
         return file_info
+
+
+class DownloadError(TrawlNet.DownloadError):
+
+    def __init__(self, reason):
+        self.reason = reason
 
 
 class NullLogger:

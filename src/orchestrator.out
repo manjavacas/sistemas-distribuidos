@@ -1,3 +1,1 @@
-32C764CB-B383-4554-A5CD-C29C4A9C5B6B -t -e 1.1:tcp -h 192.168.1.126 -p 39005 -t 60000
-[ORCHESTRATOR] receives download task https://www.youtube.com/watch?v=SSbBvKaM6sk:
-[ORCHESTRATOR] sending task to downloader...
+205CD973-7A22-4AC3-ABEA-60094AE124FB -t -e 1.1:tcp -h 192.168.1.126 -p 38173 -t 60000
