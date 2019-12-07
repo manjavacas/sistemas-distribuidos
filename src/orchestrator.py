@@ -118,8 +118,18 @@ class OrchestratorI(TrawlNet.Orchestrator):
 
         return file_data
 
-    def getFileList(self):
-        return json.dumps(self.orchestrator.files)
+    def getFileList(self, current=None):
+
+        file_list = []
+        
+        for file_hash in self.orchestrator.files:
+            file_info = TrawlNet.FileInfo()
+            file_info.hash = file_hash
+            file_info.name= self.orchestrator.files[file_hash]
+            file_list.append(file_info)
+        
+        return file_list
+    
 
     def announce(self):
         raise NotImplementedError

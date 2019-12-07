@@ -49,7 +49,7 @@ class Client(Ice.Application):
         # Get file list
         elif len(argv) == 2:
             print('[CLIENT] requesting list of available files...')
-            print(orchestrator.getFileList())
+            print(str(orchestrator.getFileList()))
 
         return 0
 
