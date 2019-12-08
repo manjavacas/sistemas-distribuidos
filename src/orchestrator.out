@@ -1,8 +1,4 @@
-57C5CF93-8E78-4C09-856E-E1AD61F7AD24 -t -e 1.1:tcp -h 192.168.1.126 -p 41793 -t 60000
+34518F74-947A-4DB1-B7BB-0D8AC9009777 -t -e 1.1:tcp -h 192.168.1.126 -p 41643 -t 60000
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[ORCHESTRATOR] receives download task https://www.youtube.com/watch?v=3L4YrGaR8E4:
-[ORCHESTRATOR] sending task to downloader...
+[ORCHESTRATOR] Receives task https://www.youtube.com/watch?v=3L4YrGaR8E4. Sending to downloader...
 [UPDATER] New file named Rage Against The Machine - Bulls On Parade (Official Video).mp3, with hash = 5f4e530f103bd3a3643f2f224bb48d7eb4b763c2d572c89427e77489d513b497
-[ORCHESTRATOR] receives download task https://www.youtube.com/watch?v=SSbBvKaM6sk:
-[ORCHESTRATOR] sending task to downloader...
-[UPDATER] New file named Blur - Song 2.mp3, with hash = 8535d3ecca1618a3846ecf29a79c6f75100c523cf9c4751310f87bf0746e6338

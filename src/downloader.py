@@ -33,6 +33,9 @@ class Downloader(Ice.Application):
         self.orchestrator = None
 
     def get_topic_manager(self):
+        '''
+        Obtains topic manager
+        '''
         key = 'IceStorm.TopicManager.Proxy'
         proxy = self.communicator().propertyToProxy(key)
 
