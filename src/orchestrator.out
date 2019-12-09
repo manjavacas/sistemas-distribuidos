@@ -1,4 +1,5 @@
-34518F74-947A-4DB1-B7BB-0D8AC9009777 -t -e 1.1:tcp -h 192.168.1.126 -p 41643 -t 60000
+5607E252-BD8B-465E-A32F-DC7FCEC79CA0 -t -e 1.1:tcp -h 172.19.145.249 -p 41097 -t 60000
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[ORCHESTRATOR] Receives task https://www.youtube.com/watch?v=3L4YrGaR8E4. Sending to downloader...
-[UPDATER] New file named Rage Against The Machine - Bulls On Parade (Official Video).mp3, with hash = 5f4e530f103bd3a3643f2f224bb48d7eb4b763c2d572c89427e77489d513b497
+[ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
+[ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
+[ORCHESTRATOR] Hello world!

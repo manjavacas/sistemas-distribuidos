@@ -25,13 +25,6 @@ class Downloader(Ice.Application):
     Downloader task receiver
     '''
 
-    def __init__(self):
-        '''
-        Class constructor
-        '''
-
-        self.orchestrator = None
-
     def get_topic_manager(self):
         '''
         Obtains topic manager
@@ -43,17 +36,16 @@ class Downloader(Ice.Application):
             print('[ÐOWNLOADER] Error: topic key not set')
             return None
 
-        print('Using IceStorm in: {0} '.format(key))
+        print('Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
     def run(self, argv):
         '''
         Run method
         '''
-
         broker = self.communicator()
 
-        # Downloader
+        ######################## DOWNLOADER ########################
         servant_downloader = DownloaderI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
         downloader_proxy = adapter.addWithUUID(servant_downloader)
@@ -103,7 +95,7 @@ class DownloaderI(TrawlNet.Downloader):
         Adds a download task from an url
         '''
 
-        print('[DOWNLOADER] Received download task: {0}'.format(url))
+        print('[DOWNLOADER] Received download task: ' + url)
 
         try:
             audio = download_mp3(url)
@@ -123,8 +115,14 @@ class DownloaderI(TrawlNet.Downloader):
 
 
 class DownloadError(TrawlNet.DownloadError):
+    '''
+    Download error exception
+    '''
 
     def __init__(self, reason):
+        '''
+        Class constructor
+        '''
         self.reason = reason
 
 

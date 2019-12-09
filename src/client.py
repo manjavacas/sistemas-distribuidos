@@ -40,10 +40,8 @@ class Client(Ice.Application):
             if parsed_url.scheme:
                 print('[CLIENT] sending URL {0} to {1}...'.format(
                     url, argv[1]))
-
                 file_info = orchestrator.downloadTask(url)
                 print('[CLIENT] Received confirmation to ' + file_info.name)
-
             else:
                 raise RuntimeError('[CLIENT] the entered URL is not valid')
         # Get file list

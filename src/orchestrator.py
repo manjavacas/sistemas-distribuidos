@@ -41,10 +41,10 @@ class Orchestrator(Ice.Application):
             print('[ORCHESTRATOR] Error: topic key not set')
             return None
 
-        print('[ORCHESTRATOR] Using IceStorm in: {0}'.format(key))
+        print('[ORCHESTRATOR] Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
-    
-    def subscribe_to(self, topic, subscriber):
+
+    def subscribe_to(self, topic_name, subscriber):
         '''
         Implements topic subscription
         '''
@@ -52,15 +52,12 @@ class Orchestrator(Ice.Application):
         if not topic_mgr:
             raise RuntimeError('[ORCHESTRATOR] Error getting topic manager')
 
-        topic_name = 'UpdateEvents'
-        qos = {}
-
         try:
             topic = topic_mgr.retrieve(topic_name)
         except IceStorm.NoSuchTopic:
             topic = topic_mgr.create(topic_name)
 
-        topic.subscribeAndGetPublisher(qos, subscriber)
+        topic.subscribeAndGetPublisher({}, subscriber)
 
     def run(self, argv):
         '''
@@ -96,10 +93,35 @@ class Orchestrator(Ice.Application):
         self.subscribe_to('UpdateEvents', updater_subscriber)
 
         ######################## GREETER ########################
-        # servant_greeter = OrchestratorEventI()
-        # broker.createObjectAdapter('GreeterAdapter')   
-        
-        
+        servant_greeter = OrchestratorEventI()
+        broker.createObjectAdapter('GreeterAdapter')
+        greeter_subscriber = adapter.addWithUUID(servant_greeter)
+
+        self.subscribe_to('OrchestratorSync', greeter_subscriber)
+
+        # Publish in orchestrator sync events topic
+        topic_mgr = self.get_topic_manager()
+
+        if not topic_mgr:
+            raise RuntimeError('[ORCHESTRATOR] Error getting topic manager')
+
+        topic_name = 'OrchestratorSync'
+        try:
+            topic = topic_mgr.retrieve(topic_name)
+        except IceStorm.NoSuchTopic:
+            print('[ORCHESTRATOR] No such topic found, creating...')
+            topic = topic_mgr.create(topic_name)
+
+        # Set publisher
+        publisher = topic.getPublisher()
+        greeter = TrawlNet.OrchestratorPrx.uncheckedCast(publisher)
+
+        servant_greeter.greeter = greeter
+
+        # Say hello
+        servant_greeter.orchestrator = self
+        servant_greeter.hello()
+
         adapter.activate()
         self.shutdownOnInterrupt()
         broker.waitForShutdown()
@@ -108,12 +130,26 @@ class Orchestrator(Ice.Application):
 
 
 class OrchestratorEventI(TrawlNet.OrchestratorEvent):
-    
+    '''
+    Orchestrator event servant
+    '''
+
     def __init__(self):
-        raise NotImplementedError
-    
-    def hello(self):
-        raise NotImplementedError
+        '''
+        Class constructor
+        '''
+        self.greeter = None
+        self.orchestrator = None
+
+    def hello(self, current=None):
+        '''
+        Sync with the rest of orchestrators
+        '''
+        print('[ORCHESTRATOR] Hello world!')
+        self.greeter.announce(self.orchestrator)
+        print('[ORCHESTRATOR] Previous orchestrators: ' +
+              str(self.orchestrator.orchestrators))
+        self.orchestrators.append(self)
 
 
 class OrchestratorI(TrawlNet.Orchestrator):
@@ -127,16 +163,15 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         self.downloader = None
         self.orchestrator = None
-        self.announcer = None
-        
-    def announce(self, other):
+
+    def announce(self, other, current=None):
         '''
-        Announces to other orchestrator
+        Announces to another orchestrator
         '''
         if other not in self.orchestrator.orchestrators:
+            print('[ORCHESTRATOR] Hi rookie!')
             self.orchestrator.orchestrators.append(other)
-            
-        print('[ORCHESTRATOR] Hi rookie!')
+
         for file_hash in self.orchestrator.files:
             if file_hash not in other.files:
                 other.files[file_hash] = self.orchestrator.files[file_hash]
@@ -146,7 +181,7 @@ class OrchestratorI(TrawlNet.Orchestrator):
         Sends a download task to a downloader
         '''
         print(
-            '[ORCHESTRATOR] Receives task {0}. Sending to downloader...'.format(url))
+            '[ORCHESTRATOR] Receives task {}. Sending to downloader...'.format(url))
 
         file_data = self.downloader.addDownloadTask(url)
 
@@ -171,7 +206,7 @@ class UpdateEventI(TrawlNet.UpdateEvent):
     '''
     Class for publishing in UpdateEvents topic
     '''
-    
+
     def __init__(self):
         '''
         Class constructor
@@ -189,6 +224,7 @@ class UpdateEventI(TrawlNet.UpdateEvent):
             print('[UPDATER] New file named {0}, with hash = {1}'.format(
                 file_info.name, file_info.hash))
             self.orchestrator.files[file_info.hash] = file_info.name
+
 
 if __name__ == '__main__':
 
