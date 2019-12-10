@@ -3,10 +3,10 @@
 
     $ ./run_server
     
-# Run client to get the list of files:
+# Run client to get the list of available files:
 
     $ ./run_client
 
-# Run client to download file:
+# Run client to download a file:
 
     $ ./run_client <youtube-url>

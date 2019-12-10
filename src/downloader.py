@@ -38,6 +38,23 @@ class Downloader(Ice.Application):
 
         print('Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
+    
+    def get_topic(self, topic_name):
+        '''
+        Creates a new topic or returns an existing one
+        '''
+        topic_mgr = self.get_topic_manager()
+
+        if not topic_mgr:
+            raise RuntimeError('[ÐOWNLOADER] Error getting topic manager')
+
+        try:
+            topic = topic_mgr.retrieve(topic_name)
+        except IceStorm.NoSuchTopic:
+            print('[DOWNLOADER] No such topic found, creating...')
+            topic = topic_mgr.create(topic_name)
+
+        return topic
 
     def run(self, argv):
         '''
@@ -45,7 +62,7 @@ class Downloader(Ice.Application):
         '''
         broker = self.communicator()
 
-        ######################## DOWNLOADER ########################
+        # Set servant
         servant_downloader = DownloaderI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
         downloader_proxy = adapter.addWithUUID(servant_downloader)
@@ -54,19 +71,7 @@ class Downloader(Ice.Application):
         print(downloader_proxy, flush=True)
 
         # Publish in file update events topic
-        topic_mgr = self.get_topic_manager()
-
-        if not topic_mgr:
-            raise RuntimeError('[ÐOWNLOADER] Error getting topic manager')
-
-        topic_name = 'UpdateEvents'
-        try:
-            topic = topic_mgr.retrieve(topic_name)
-        except IceStorm.NoSuchTopic:
-            print('[DOWNLOADER] No such topic found, creating...')
-            topic = topic_mgr.create(topic_name)
-
-        # Set publisher
+        topic = self.get_topic('UpdateEvents')
         publisher = topic.getPublisher()
         updater = TrawlNet.UpdateEventPrx.uncheckedCast(publisher)
 
@@ -94,7 +99,6 @@ class DownloaderI(TrawlNet.Downloader):
         '''
         Adds a download task from an url
         '''
-
         print('[DOWNLOADER] Received download task: ' + url)
 
         try:

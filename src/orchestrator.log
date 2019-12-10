@@ -1,5 +1,4 @@
-5607E252-BD8B-465E-A32F-DC7FCEC79CA0 -t -e 1.1:tcp -h 172.19.145.249 -p 41097 -t 60000
+62D3BED9-1DB6-4FD7-BAD0-A7592B32B24C -t -e 1.1:tcp -h 172.19.151.110 -p 41763 -t 60000
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[ORCHESTRATOR] Hello world!

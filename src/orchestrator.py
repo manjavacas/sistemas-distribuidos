@@ -44,6 +44,24 @@ class Orchestrator(Ice.Application):
         print('[ORCHESTRATOR] Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
+    def get_topic(self, topic_name):
+        '''
+        Creates a new topic or returns an existing one
+        '''
+
+        topic_mgr = self.get_topic_manager()
+
+        if not topic_mgr:
+            raise RuntimeError('[ORCHESTRATOR] Error getting topic manager')
+
+        try:
+            topic = topic_mgr.retrieve(topic_name)
+        except IceStorm.NoSuchTopic:
+            print('[ORCHESTRATOR] No such topic found, creating...')
+            topic = topic_mgr.create(topic_name)
+
+        return topic
+
     def subscribe_to(self, topic_name, subscriber):
         '''
         Implements topic subscription
@@ -67,7 +85,7 @@ class Orchestrator(Ice.Application):
 
         ######################## TASKER ########################
         servant_orchestrator = OrchestratorI()
-        adapter = broker.createObjectAdapter("OrchestratorAdapter")
+        adapter = broker.createObjectAdapter('OrchestratorAdapter')
         orchestrator_proxy = adapter.addWithUUID(servant_orchestrator)
 
         # Show proxy
@@ -100,27 +118,12 @@ class Orchestrator(Ice.Application):
         self.subscribe_to('OrchestratorSync', greeter_subscriber)
 
         # Publish in orchestrator sync events topic
-        topic_mgr = self.get_topic_manager()
-
-        if not topic_mgr:
-            raise RuntimeError('[ORCHESTRATOR] Error getting topic manager')
-
-        topic_name = 'OrchestratorSync'
-        try:
-            topic = topic_mgr.retrieve(topic_name)
-        except IceStorm.NoSuchTopic:
-            print('[ORCHESTRATOR] No such topic found, creating...')
-            topic = topic_mgr.create(topic_name)
-
-        # Set publisher
+        topic = self.get_topic('OrchestratorSync')
         publisher = topic.getPublisher()
         greeter = TrawlNet.OrchestratorPrx.uncheckedCast(publisher)
 
         servant_greeter.greeter = greeter
-
-        # Say hello
-        servant_greeter.orchestrator = self
-        servant_greeter.hello()
+        servant_greeter.hello(self)
 
         adapter.activate()
         self.shutdownOnInterrupt()
@@ -139,17 +142,15 @@ class OrchestratorEventI(TrawlNet.OrchestratorEvent):
         Class constructor
         '''
         self.greeter = None
-        self.orchestrator = None
 
-    def hello(self, current=None):
+    def hello(self, me, current=None):
         '''
         Sync with the rest of orchestrators
         '''
-        print('[ORCHESTRATOR] Hello world!')
-        self.greeter.announce(self.orchestrator)
+        self.greeter.announce(me)
         print('[ORCHESTRATOR] Previous orchestrators: ' +
-              str(self.orchestrator.orchestrators))
-        self.orchestrators.append(self)
+              str(me.orchestrators))
+        me.orchestrators.append(me)
 
 
 class OrchestratorI(TrawlNet.Orchestrator):

@@ -31,22 +31,22 @@ class Client(Ice.Application):
         orchestrator = TrawlNet.OrchestratorPrx.checkedCast(proxy)
 
         if not orchestrator:
-            raise RuntimeError('[CLIENT] error: invalid orchestrator proxy')
+            raise RuntimeError('[CLIENT] Error: invalid orchestrator proxy')
 
         # Download audio
         if len(argv) == 3:
             url = argv[2]
             parsed_url = urlparse(url)
             if parsed_url.scheme:
-                print('[CLIENT] sending URL {0} to {1}...'.format(
+                print('[CLIENT] Sending URL {0} to {1}...'.format(
                     url, argv[1]))
                 file_info = orchestrator.downloadTask(url)
                 print('[CLIENT] Received confirmation to ' + file_info.name)
             else:
-                raise RuntimeError('[CLIENT] the entered URL is not valid')
+                raise RuntimeError('[CLIENT] Error: the entered URL is not valid')
         # Get file list
         elif len(argv) == 2:
-            print('[CLIENT] requesting list of available files...')
+            print('[CLIENT] Requesting list of available files...')
             print(str(orchestrator.getFileList()))
 
         return 0
