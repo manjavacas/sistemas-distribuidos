@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-'''
-Client for sending requests to download videos
+''' 
+Client class 
 '''
 
 # Libs
@@ -19,14 +19,15 @@ __license__ = 'GPL'
 
 
 class Client(Ice.Application):
-    '''
-    Client class which calls the orchestrator
+    ''' 
+    Client class 
     '''
 
     def run(self, argv):
+        ''' 
+        Run method 
         '''
-        Run method
-        '''
+        
         proxy = self.communicator().stringToProxy(argv[1])
         orchestrator = TrawlNet.OrchestratorPrx.checkedCast(proxy)
 
@@ -53,6 +54,5 @@ class Client(Ice.Application):
 
 
 if __name__ == '__main__':
-
-    client = Client()
-    sys.exit(client.main(sys.argv))
+    app = Client()
+    sys.exit(app.main(sys.argv))

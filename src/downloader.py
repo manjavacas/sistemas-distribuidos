@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-'''
-Youtube video downloader
+''' 
+Youtube video downloader 
 '''
 
-# Libs
 import sys
 import hashlib
 import Ice
@@ -20,15 +19,16 @@ __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
 
-class Downloader(Ice.Application):
-    '''
-    Downloader task receiver
+class DownloaderServer(Ice.Application):
+    ''' 
+    Downloader task receiver 
     '''
 
     def get_topic_manager(self):
+        ''' 
+        Obtains topic manager 
         '''
-        Obtains topic manager
-        '''
+
         key = 'IceStorm.TopicManager.Proxy'
         proxy = self.communicator().propertyToProxy(key)
 
@@ -38,11 +38,12 @@ class Downloader(Ice.Application):
 
         print('Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
-    
+
     def get_topic(self, topic_name):
+        ''' 
+        Creates a new topic or returns an existing one 
         '''
-        Creates a new topic or returns an existing one
-        '''
+
         topic_mgr = self.get_topic_manager()
 
         if not topic_mgr:
@@ -57,20 +58,19 @@ class Downloader(Ice.Application):
         return topic
 
     def run(self, argv):
+        ''' 
+        Run method 
         '''
-        Run method
-        '''
+
         broker = self.communicator()
 
-        # Set servant
         servant_downloader = DownloaderI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
         downloader_proxy = adapter.addWithUUID(servant_downloader)
 
-        # Show proxy
+        # Show proxy to orchestrator
         print(downloader_proxy, flush=True)
 
-        # Publish in file update events topic
         topic = self.get_topic('UpdateEvents')
         publisher = topic.getPublisher()
         updater = TrawlNet.UpdateEventPrx.uncheckedCast(publisher)
@@ -85,19 +85,19 @@ class Downloader(Ice.Application):
 
 
 class DownloaderI(TrawlNet.Downloader):
-    '''
-    Downloader servant
+    ''' 
+    Downloader servant 
     '''
 
     def __init__(self):
-        '''
-        Class constructor
+        ''' 
+        Class constructor 
         '''
         self.updater = None
 
     def addDownloadTask(self, url, current=None):
-        '''
-        Adds a download task from an url
+        ''' 
+        Processes a download task from an url 
         '''
         print('[DOWNLOADER] Received download task: ' + url)
 
@@ -119,20 +119,18 @@ class DownloaderI(TrawlNet.Downloader):
 
 
 class DownloadError(TrawlNet.DownloadError):
-    '''
-    Download error exception
+    ''' 
+    Download error exception 
     '''
 
     def __init__(self, reason):
-        '''
-        Class constructor
-        '''
+        ''' Class constructor '''
         self.reason = reason
 
 
 class NullLogger:
-    '''
-    NullLogger used by YouTube video downloader
+    ''' 
+    NullLogger used by YouTube video downloader 
     '''
 
     def debug(self, msg):
@@ -157,8 +155,8 @@ _YOUTUBEDL_OPTS_ = {
 
 
 def download_mp3(url, destination='./downloads'):
-    '''
-    Synchronous download from YouTube
+    ''' 
+    Synchronous download from YouTube 
     '''
     options = {}
     task_status = {}
@@ -177,6 +175,5 @@ def download_mp3(url, destination='./downloads'):
 
 
 if __name__ == '__main__':
-
-    downloader = Downloader()
-    sys.exit(downloader.main(sys.argv))
+    app = DownloaderServer()
+    sys.exit(app.main(sys.argv))
