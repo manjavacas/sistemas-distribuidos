@@ -1,6 +1,4 @@
-AC4B09EC-BACF-4F8A-BC99-BF95C0FAFB7B -t -e 1.1:tcp -h 172.19.151.110 -p 36305 -t 60000
+38568EC0-C983-4283-AECB-AC881A567F10 -t -e 1.1:tcp -h 172.19.151.110 -p 42207 -t 60000
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
 [ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[UPDATER] New file named Blur - Song 2.mp3, with hash = 8535d3ecca1618a3846ecf29a79c6f75100c523cf9c4751310f87bf0746e6338
-[UPDATER] New file named Pearl Jam - Even Flow.mp3, with hash = 1381afff1f860f99a9cb79bf0089dbe7f773a8f12a8811d71f821c4de2a5ffaf

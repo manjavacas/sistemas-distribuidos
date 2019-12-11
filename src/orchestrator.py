@@ -141,7 +141,6 @@ class OrchestratorI(TrawlNet.Orchestrator):
         ''' 
         Announces to another orchestrator 
         '''
-        print("HELLO HELLO!")
         if other not in self.orchestrator.orchestrators:
             print('[ORCHESTRATOR] Hi rookie!')
             self.orchestrator.orchestrators.append(other)
