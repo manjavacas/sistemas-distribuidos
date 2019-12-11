@@ -22,7 +22,6 @@ class OrchestratorServer(Ice.Application):
     Orchestrator creator 
     '''
     def __init__(self):
-        self.downloader = None
         self.files = {}
         self.orchestrators = []
     
@@ -136,6 +135,7 @@ class OrchestratorI(TrawlNet.Orchestrator):
         Class constructor
         '''
         self.orchestrator = None
+        self.downloader = None
            
     def announce(self, other, current=None):
         ''' 
