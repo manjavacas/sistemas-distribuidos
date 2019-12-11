@@ -7,5 +7,5 @@ if (( $# == 1 )); then
 elif (( $# == 0 )); then
     ./client.py "$(head -1 orchestrator.log)" --Ice.Config=$CONFIG_CLIENT
 else
-    echo '[CLIENT] Usage: client.py <orchestrator_proxy> (<file_url>) --Ice.Config=client.config'
+    echo '[CLIENT] Usage: client.py <orchestrator_proxy> (<video_url>) --Ice.Config=client.config'
 fi

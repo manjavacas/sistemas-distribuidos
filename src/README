@@ -1,12 +1,16 @@
 
-# Run orchestrator and downloader (including icegridregistry and icebox):
+## 1. RUN SERVER ##
+
+Run orchestrator and downloader (including icegridregistry and icebox):
 
     $ ./run_server
     
-# Run client to get the list of available files:
+## 2. RUN CLIENT ##
 
-    $ ./run_client
+    2.1. Run client to get the list of available files:
 
-# Run client to download a file:
+        $ ./run_client
 
-    $ ./run_client <youtube-url>
+    2.2. Run client to download a file:
+
+        $ ./run_client <youtube-url>
