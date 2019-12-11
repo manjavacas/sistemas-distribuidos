@@ -21,6 +21,10 @@ class OrchestratorServer(Ice.Application):
     ''' 
     Orchestrator creator 
     '''
+    def __init__(self):
+        self.downloader = None
+        self.files = {}
+        self.orchestrators = []
     
     def get_topic(self, topic_name):
         ''' 
@@ -104,8 +108,9 @@ class OrchestratorServer(Ice.Application):
                 '[ORCHESTRATOR] Error: invalid downloader proxy')
 
         servant_orchestrator.downloader = downloader
+        servant_orchestrator.orchestrator = self
+        servant_updater.orchestrator = self
         
-        servant_updater.orchestrator = TrawlNet.OrchestratorPrx.checkedCast(orchestrator_proxy)
         servant_greeter.orchestrator = TrawlNet.OrchestratorPrx.checkedCast(orchestrator_proxy)
         
         # Make public
@@ -130,24 +135,21 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         Class constructor
         '''
-        self.downloader = None
-        self.files = {}
-        self.orchestrators = []
-        
+        self.orchestrator = None
            
     def announce(self, other, current=None):
         ''' 
         Announces to another orchestrator 
         '''
-        
-        if other not in self.orchestrators:
+        print("HELLO HELLO!")
+        if other not in self.orchestrator.orchestrators:
             print('[ORCHESTRATOR] Hi rookie!')
-            self.orchestrators.append(other)
+            self.orchestrator.orchestrators.append(other)
 
         other_list = other.getFileList()
-        for file_hash in self.files:
+        for file_hash in self.orchestrator.files:
             if file_hash not in other_list:
-                other_list[file_hash] = self.files[file_hash]
+                other_list[file_hash] = self.orchestrator.files[file_hash]
 
     def downloadTask(self, url, current=None):
         ''' 
@@ -162,10 +164,10 @@ class OrchestratorI(TrawlNet.Orchestrator):
         
         file_list = []
 
-        for file_hash in self.files:
+        for file_hash in self.orchestrator.files:
             file_info = TrawlNet.FileInfo()
             file_info.hash = file_hash
-            file_info.name = self.files[file_hash]
+            file_info.name = self.orchestrator.files[file_hash]
             file_list.append(file_info)
 
         return file_list
