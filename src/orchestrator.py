@@ -109,19 +109,20 @@ class OrchestratorServer(Ice.Application):
         servant_orchestrator.downloader = downloader
         servant_orchestrator.orchestrator = self
         servant_updater.orchestrator = self
+        servant_greeter.orchestrator = TrawlNet.OrchestratorPrx.uncheckedCast(orchestrator_proxy)
         
-        servant_greeter.orchestrator = TrawlNet.OrchestratorPrx.checkedCast(orchestrator_proxy)
-        
-        # Make public
         topic = self.get_topic('OrchestratorSync')
         publisher = topic.getPublisher()
-
-        servant_greeter.hello(TrawlNet.OrchestratorPrx.uncheckedCast(publisher))
-
+        greeter = TrawlNet.OrchestratorEventPrx.uncheckedCast(publisher)
+        
         adapter.activate()
+        
+        # Make public
+        greeter.hello(TrawlNet.OrchestratorPrx.uncheckedCast(orchestrator_proxy))
+        
         self.shutdownOnInterrupt()
         broker.waitForShutdown()
-
+        
         return 0
 
 
@@ -136,6 +137,7 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         self.orchestrator = None
         self.downloader = None
+        self.servant = None
            
     def announce(self, other, current=None):
         ''' 
