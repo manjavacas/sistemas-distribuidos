@@ -1,16 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-''' 
-Youtube video downloader 
 '''
+Youtube video downloader
+'''
+
+from exceptions import DownloadError
 
 import sys
 import hashlib
-import Ice
-import IceStorm
 import os
+
+import Ice
 import youtube_dl
+import IceStorm
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -20,13 +23,13 @@ __license__ = 'GPL'
 
 
 class DownloaderServer(Ice.Application):
-    ''' 
-    Downloader task receiver 
+    '''
+    Downloader task receiver
     '''
 
     def get_topic_manager(self):
-        ''' 
-        Obtains topic manager 
+        '''
+        Obtains topic manager
         '''
 
         key = 'IceStorm.TopicManager.Proxy'
@@ -40,8 +43,8 @@ class DownloaderServer(Ice.Application):
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
     def get_topic(self, topic_name):
-        ''' 
-        Creates a new topic or returns an existing one 
+        '''
+        Creates a new topic or returns an existing one
         '''
 
         topic_mgr = self.get_topic_manager()
@@ -58,8 +61,8 @@ class DownloaderServer(Ice.Application):
         return topic
 
     def run(self, argv):
-        ''' 
-        Run method 
+        '''
+        Run method
         '''
 
         broker = self.communicator()
@@ -85,20 +88,21 @@ class DownloaderServer(Ice.Application):
 
 
 class DownloaderI(TrawlNet.Downloader):
-    ''' 
-    Downloader servant 
+    '''
+    Downloader servant
     '''
 
     def __init__(self):
-        ''' 
-        Class constructor 
+        '''
+        Class constructor
         '''
         self.updater = None
 
     def addDownloadTask(self, url, current=None):
-        ''' 
-        Processes a download task from an url 
         '''
+        Processes a download task from an url
+        '''
+
         print('[DOWNLOADER] Received download task: ' + url)
 
         try:
@@ -118,28 +122,27 @@ class DownloaderI(TrawlNet.Downloader):
         return file_info
 
 
-class DownloadError(TrawlNet.DownloadError):
-    ''' 
-    Download error exception 
-    '''
-
-    def __init__(self, reason):
-        ''' Class constructor '''
-        self.reason = reason
-
-
 class NullLogger:
-    ''' 
-    NullLogger used by YouTube video downloader 
+    '''
+    NullLogger used by YouTube video downloader
     '''
 
     def debug(self, msg):
+        '''
+        Debug
+        '''
         pass
 
     def warning(self, msg):
+        '''
+        Warning
+        '''
         pass
 
     def error(self, msg):
+        '''
+        Error
+        '''
         pass
 
 
@@ -154,15 +157,20 @@ _YOUTUBEDL_OPTS_ = {
 }
 
 
-def download_mp3(url, destination='./downloads'):
-    ''' 
-    Synchronous download from YouTube 
+def download_mp3(url, destination='./'):
     '''
+    Synchronous download from YouTube
+    '''
+
     options = {}
     task_status = {}
 
     def progress_hook(status):
+        '''
+        Progress hook
+        '''
         task_status.update(status)
+
     options.update(_YOUTUBEDL_OPTS_)
     options['progress_hooks'] = [progress_hook]
     options['outtmpl'] = os.path.join(destination, '%(title)s.%(ext)s')
@@ -175,5 +183,4 @@ def download_mp3(url, destination='./downloads'):
 
 
 if __name__ == '__main__':
-    app = DownloaderServer()
-    sys.exit(app.main(sys.argv))
+    sys.exit(DownloaderServer().main(sys.argv))

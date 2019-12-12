@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-''' 
+'''
 Orchestrator class
 '''
+
+from exceptions import DownloadError
 
 import sys
 import Ice
 import IceStorm
-import json
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -18,16 +19,21 @@ __license__ = 'GPL'
 
 
 class OrchestratorServer(Ice.Application):
-    ''' 
-    Orchestrator creator 
     '''
+    Orchestrator creator
+    '''
+
     def __init__(self):
+        '''
+        Class constructor
+        '''
+
         self.files = {}
         self.orchestrators = []
-    
+
     def get_topic(self, topic_name):
-        ''' 
-        Creates a new topic or returns an existing one 
+        '''
+        Creates a new topic or returns an existing one
         '''
 
         topic_mgr = self.get_topic_manager()
@@ -44,10 +50,10 @@ class OrchestratorServer(Ice.Application):
         return topic
 
     def get_topic_manager(self):
-        ''' 
-        Obtains the topic manager 
         '''
-        
+        Obtains the topic manager
+        '''
+
         key = 'IceStorm.TopicManager.Proxy'
         proxy = self.communicator().propertyToProxy(key)
 
@@ -59,10 +65,10 @@ class OrchestratorServer(Ice.Application):
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
     def subscribe_to(self, topic_name, subscriber):
-        ''' 
-        Implements topic subscription 
         '''
-        
+        Implements topic subscription
+        '''
+
         topic_mgr = self.get_topic_manager()
         if not topic_mgr:
             raise RuntimeError('[ORCHESTRATOR] Error getting topic manager')
@@ -75,74 +81,77 @@ class OrchestratorServer(Ice.Application):
         topic.subscribeAndGetPublisher({}, subscriber)
 
     def run(self, argv):
-        ''' 
-        Run method 
         '''
-        
-        # Create servants
+        Run method
+        '''
+
         broker = self.communicator()
-        
+
+        ######## ORCHESTRATOR SERVANT ########
         servant_orchestrator = OrchestratorI()
         adapter = broker.createObjectAdapter('OrchestratorAdapter')
         orchestrator_proxy = adapter.addWithUUID(servant_orchestrator)
+        servant_orchestrator.orchestrator = self
 
         # Show proxy to downloader
         print(orchestrator_proxy, flush=True)
 
+        downloader_proxy = broker.stringToProxy(argv[1])
+        downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
+        servant_orchestrator.downloader = downloader
+
+        ######## UPDATER SERVANT ########
+        servant_updater = UpdateEventI()
+        broker.createObjectAdapter('UpdaterAdapter')
+        updater_proxy = adapter.addWithUUID(servant_updater)
+        self.subscribe_to('UpdateEvents', updater_proxy)
+        servant_updater.orchestrator = self
+
+        ######## GREETER SERVANT ########
         servant_greeter = OrchestratorEventI()
         broker.createObjectAdapter('GreeterAdapter')
         greeter_proxy = adapter.addWithUUID(servant_greeter)
         self.subscribe_to('OrchestratorSync', greeter_proxy)
 
-        servant_updater = UpdateEventI()
-        broker.createObjectAdapter('UpdaterAdapter')
-        updater_proxy = adapter.addWithUUID(servant_updater)
-        self.subscribe_to('UpdateEvents', updater_proxy)
+        # Publish in OrchestratorSync topic
+        servant_greeter.orchestrator = TrawlNet.OrchestratorPrx.uncheckedCast(
+            orchestrator_proxy)
 
-        downloader_proxy = broker.stringToProxy(argv[1])
-        downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
-
-        if not downloader:
-            raise RuntimeError(
-                '[ORCHESTRATOR] Error: invalid downloader proxy')
-
-        servant_orchestrator.downloader = downloader
-        servant_orchestrator.orchestrator = self
-        servant_updater.orchestrator = self
-        servant_greeter.orchestrator = TrawlNet.OrchestratorPrx.uncheckedCast(orchestrator_proxy)
-        
         topic = self.get_topic('OrchestratorSync')
         publisher = topic.getPublisher()
         greeter = TrawlNet.OrchestratorEventPrx.uncheckedCast(publisher)
-        
+
         adapter.activate()
-        
+
         # Make public
-        greeter.hello(TrawlNet.OrchestratorPrx.uncheckedCast(orchestrator_proxy))
-        
+        greeter.hello(
+            TrawlNet.OrchestratorPrx.uncheckedCast(orchestrator_proxy))
+
         self.shutdownOnInterrupt()
         broker.waitForShutdown()
-        
+
         return 0
 
 
 class OrchestratorI(TrawlNet.Orchestrator):
-    ''' 
-    Orchestrator servant 
     '''
-    
+    Orchestrator servant
+    '''
+
     def __init__(self):
         '''
         Class constructor
         '''
+
         self.orchestrator = None
         self.downloader = None
         self.servant = None
-           
+
     def announce(self, other, current=None):
-        ''' 
-        Announces to another orchestrator 
         '''
+        Announces to another orchestrator
+        '''
+
         if other not in self.orchestrator.orchestrators:
             print('[ORCHESTRATOR] Hi rookie!')
             self.orchestrator.orchestrators.append(other)
@@ -153,16 +162,21 @@ class OrchestratorI(TrawlNet.Orchestrator):
                 other_list[file_hash] = self.orchestrator.files[file_hash]
 
     def downloadTask(self, url, current=None):
-        ''' 
-        Sends a download task to a downloader 
         '''
+        Sends a download task to a downloader
+        '''
+
+        if not self.downloader:
+            raise DownloadError(
+                '[ORCHESTRATOR] Error: invalid downloader proxy')
+
         return self.downloader.addDownloadTask(url)
 
     def getFileList(self, current=None):
-        ''' 
-        Returns the list of available files 
         '''
-        
+        Returns the list of available files
+        '''
+
         file_list = []
 
         for file_hash in self.orchestrator.files:
@@ -175,47 +189,50 @@ class OrchestratorI(TrawlNet.Orchestrator):
 
 
 class OrchestratorEventI(TrawlNet.OrchestratorEvent):
-    ''' 
-    Orchestrator event servant 
+    '''
+    Orchestrator event servant
     '''
 
     def __init__(self):
-        ''' 
-        Class constructor 
         '''
+        Class constructor
+        '''
+
         self.orchestrator = None
 
     def hello(self, me, current=None):
-        ''' 
-        Sync with the rest of orchestrators 
         '''
+        Sync with the rest of orchestrators
+        '''
+
         me.announce(self.orchestrator)
-            
+
 
 class UpdateEventI(TrawlNet.UpdateEvent):
-    ''' 
-    Class for publishing in UpdateEvents topic 
+    '''
+    Class for publishing in UpdateEvents topic
     '''
 
     def __init__(self):
-        ''' 
-        Class constructor 
         '''
+        Class constructor
+        '''
+
         self.orchestrator = None
 
     def newFile(self, file_info, current=None):
-        ''' 
-        Updates list with new files 
         '''
-        
+        Updates list with new files
+        '''
+
         if not self.orchestrator:
-            raise RuntimeError('[UPDATER] Error getting orchestrator')
+            raise DownloadError('[UPDATER] Error getting orchestrator')
 
         if file_info.hash not in self.orchestrator.files:
             print('[UPDATER] New file named {0}, with hash = {1}'.format(
                 file_info.name, file_info.hash))
             self.orchestrator.files[file_info.hash] = file_info.name
 
+
 if __name__ == '__main__':
-    app = OrchestratorServer()
-    sys.exit(app.main(sys.argv))
+    sys.exit(OrchestratorServer().main(sys.argv))

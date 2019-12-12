@@ -1,15 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-''' 
-Client class 
+'''
+Client class
 '''
 
-# Libs
+from urllib.parse import urlparse
+
 import sys
 import Ice
-import IceStorm
-from urllib.parse import urlparse
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -19,15 +18,14 @@ __license__ = 'GPL'
 
 
 class Client(Ice.Application):
-    ''' 
-    Client class 
+    '''
+    Client class
     '''
 
     def run(self, argv):
-        ''' 
-        Run method 
         '''
-        
+        Run method
+        '''
         proxy = self.communicator().stringToProxy(argv[1])
         orchestrator = TrawlNet.OrchestratorPrx.checkedCast(proxy)
 
@@ -44,7 +42,8 @@ class Client(Ice.Application):
                 file_info = orchestrator.downloadTask(url)
                 print('[CLIENT] Received confirmation to ' + file_info.name)
             else:
-                raise RuntimeError('[CLIENT] Error: the entered URL is not valid')
+                raise RuntimeError(
+                    '[CLIENT] Error: the entered URL is not valid')
         # Get file list
         elif len(argv) == 2:
             print('[CLIENT] Requesting list of available files...')
@@ -52,7 +51,5 @@ class Client(Ice.Application):
 
         return 0
 
-
 if __name__ == '__main__':
-    app = Client()
-    sys.exit(app.main(sys.argv))
+    sys.exit(Client().main(sys.argv))
