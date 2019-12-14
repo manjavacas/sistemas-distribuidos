@@ -8,7 +8,9 @@ Orchestrator class
 from exceptions import DownloadError
 
 import sys
+import hashlib
 import Ice
+import youtube_dl
 import IceStorm
 
 Ice.loadSlice('trawlnet.ice')
@@ -27,7 +29,6 @@ class OrchestratorServer(Ice.Application):
         '''
         Class constructor
         '''
-
         self.files = {}
         self.orchestrators = []
 
@@ -166,11 +167,19 @@ class OrchestratorI(TrawlNet.Orchestrator):
         Sends a download task to a downloader
         '''
 
-        if not self.downloader:
-            raise DownloadError(
-                '[ORCHESTRATOR] Error: invalid downloader proxy')
+        video_hash = hashlib.sha256(generate_id(url).encode()).hexdigest()
 
-        return self.downloader.addDownloadTask(url)
+        if video_hash in self.orchestrator.files:
+            print('[ORCHESTRATOR] The file has been previously downloaded')
+            file_info = TrawlNet.FileInfo()
+            file_info.name = self.orchestrator.files[video_hash]
+            file_info.hash = video_hash
+            return file_info
+        else:
+            if not self.downloader:
+                raise DownloadError(
+                    '[ORCHESTRATOR] Error: invalid downloader proxy')
+            return self.downloader.addDownloadTask(url)
 
     def getFileList(self, current=None):
         '''
@@ -197,14 +206,12 @@ class OrchestratorEventI(TrawlNet.OrchestratorEvent):
         '''
         Class constructor
         '''
-
         self.orchestrator = None
 
     def hello(self, me, current=None):
         '''
         Sync with the rest of orchestrators
         '''
-
         me.announce(self.orchestrator)
 
 
@@ -217,7 +224,6 @@ class UpdateEventI(TrawlNet.UpdateEvent):
         '''
         Class constructor
         '''
-
         self.orchestrator = None
 
     def newFile(self, file_info, current=None):
@@ -232,6 +238,17 @@ class UpdateEventI(TrawlNet.UpdateEvent):
             print('[UPDATER] New file named {0}, with hash = {1}'.format(
                 file_info.name, file_info.hash))
             self.orchestrator.files[file_info.hash] = file_info.name
+
+
+def generate_id(url):
+    '''
+    Gets a video id from its url
+    '''
+
+    with youtube_dl.YoutubeDL() as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+
+    return info_dict['id']
 
 
 if __name__ == '__main__':

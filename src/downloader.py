@@ -110,8 +110,10 @@ class DownloaderI(TrawlNet.Downloader):
         except:
             raise DownloadError('[DOWNLOADER] Error in audio download')
 
+        print('[DOWNLOADER] The file ' + os.path.basename(audio) + ' has been downloaded')
+
         file_info = TrawlNet.FileInfo()
-        file_info.name = os.path.basename(audio)
+        file_info.name = generate_id(url)
         file_info.hash = hashlib.sha256(file_info.name.encode()).hexdigest()
 
         if not self.updater:
@@ -181,6 +183,15 @@ def download_mp3(url, destination='./'):
     filename = filename[:filename.rindex('.') + 1]
     return filename + options['postprocessors'][0]['preferredcodec']
 
+def generate_id(url):
+    '''
+    Gets a video id from its url
+    '''
+
+    with youtube_dl.YoutubeDL(_YOUTUBEDL_OPTS_) as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+
+    return info_dict['id']
 
 if __name__ == '__main__':
     sys.exit(DownloaderServer().main(sys.argv))
