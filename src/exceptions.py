@@ -10,7 +10,32 @@ import Ice
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
 
-class DownloadError(TrawlNet.DownloadError):
+
+class GeneralError(TrawlNet.GeneralError):
+    '''
+    General error exception
+    '''
+
+    def __init__(self, reason=''):
+        '''
+        Class constructor
+        '''
+        self.reason = reason
+
+
+class TransferError(TrawlNet.TransferError, GeneralError):
+    '''
+    Transfer error exception
+    '''
+
+    def __init__(self, reason):
+        '''
+        Class constructor
+        '''
+        GeneralError.__init__(self, reason)
+
+
+class DownloadError(TrawlNet.DownloadError, GeneralError):
     '''
     Download error exception
     '''
@@ -19,4 +44,4 @@ class DownloadError(TrawlNet.DownloadError):
         '''
         Class constructor
         '''
-        self.reason = reason
+        GeneralError.__init__(self, reason)

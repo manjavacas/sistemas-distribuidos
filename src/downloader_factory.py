@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 '''
@@ -14,6 +14,7 @@ import os
 import Ice
 import youtube_dl
 import IceStorm
+import IceGrid
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -24,7 +25,7 @@ __license__ = 'GPL'
 
 class DownloaderServer(Ice.Application):
     '''
-    Downloader task receiver
+    Downloader server
     '''
 
     def get_topic_manager(self):
@@ -60,25 +61,26 @@ class DownloaderServer(Ice.Application):
 
         return topic
 
-    def run(self, argv):
+    def run(self, args):
         '''
         Run method
         '''
-
+        
         broker = self.communicator()
 
-        servant_downloader = DownloaderI()
+        servant = DownloaderFactoryI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
-        downloader_proxy = adapter.addWithUUID(servant_downloader)
+        proxy = adapter.addWithUUID(servant)
 
-        # Show proxy to orchestrator
-        print(downloader_proxy, flush=True)
+        # Show proxy
+        print(proxy, flush=True)
 
+        # Subscription to UpdateEvents
         topic = self.get_topic('UpdateEvents')
         publisher = topic.getPublisher()
         updater = TrawlNet.UpdateEventPrx.uncheckedCast(publisher)
 
-        servant_downloader.updater = updater
+        servant.updater = updater
 
         adapter.activate()
         self.shutdownOnInterrupt()
@@ -110,7 +112,8 @@ class DownloaderI(TrawlNet.Downloader):
         except:
             raise DownloadError('[DOWNLOADER] Error in audio download')
 
-        print('[DOWNLOADER] The file ' + os.path.basename(audio) + ' has been downloaded')
+        print('[DOWNLOADER] The file ' +
+              os.path.basename(audio) + ' has been downloaded')
 
         file_info = TrawlNet.FileInfo()
         file_info.name = generate_id(url)
@@ -122,6 +125,42 @@ class DownloaderI(TrawlNet.Downloader):
         self.updater.newFile(file_info)
 
         return file_info
+
+    def destroy(self, current):
+        '''
+        Removes the downloader
+        '''
+        try:
+            current.adapter.remove(current.id)
+            print('[DOWNLOADER] Downloader destroyed', flush=True)
+        except Exception as e:
+            print(e, flush=True)
+
+
+class DownloaderFactoryI(TrawlNet.DownloaderFactory):
+    '''
+    Downloader factory
+    '''
+
+    def __init__(self):
+        '''
+        Class constructor
+        '''
+        self.updater = None
+
+    def create(self, current):
+        '''
+        Creates a new downloader
+        '''
+        
+        servant = DownloaderI()
+        proxy = current.adapter.addWithUUID(servant)
+
+        servant.updater = self.updater
+
+        print('[DOWNLOADER-FACTORY] New downloader!', flush=True)
+
+        return TrawlNet.DownloaderPrx.checkedCast(proxy)
 
 
 class NullLogger:
@@ -147,7 +186,6 @@ class NullLogger:
         '''
         pass
 
-
 _YOUTUBEDL_OPTS_ = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -158,8 +196,7 @@ _YOUTUBEDL_OPTS_ = {
     'logger': NullLogger()
 }
 
-
-def download_mp3(url, destination='./'):
+def download_mp3(url, destination='./downloads'):
     '''
     Synchronous download from YouTube
     '''
@@ -183,6 +220,7 @@ def download_mp3(url, destination='./'):
     filename = filename[:filename.rindex('.') + 1]
     return filename + options['postprocessors'][0]['preferredcodec']
 
+
 def generate_id(url):
     '''
     Gets a video id from its url
@@ -192,6 +230,7 @@ def generate_id(url):
         info_dict = ydl.extract_info(url, download=False)
 
     return info_dict['id']
+
 
 if __name__ == '__main__':
     sys.exit(DownloaderServer().main(sys.argv))

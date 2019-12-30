@@ -1,11 +1,16 @@
+1. RUN ICESTORM + ICEREGISTRY
 
-1. RUN SERVER
+Run IceStorm and IceRegistry:
 
-Run orchestrator and downloader (including icegridregistry and icebox):
+  $ ./run_icestorm
+
+2. RUN SERVER
+
+Run orchestrator and downloader:
 
     $ ./run_server
-    
-2. RUN CLIENT
+
+3. RUN CLIENT
 
     2.1. Run client to get the list of available files:
 

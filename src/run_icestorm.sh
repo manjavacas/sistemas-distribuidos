@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -f -r ./*.log ./db/registry ./__pycache__ ./IceStorm
+rm -f -r ./db/registry ./IceStorm
 mkdir -p ./db/registry IceStorm/
 
 CONFIG_REGISTRY=node.config

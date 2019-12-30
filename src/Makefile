@@ -23,4 +23,5 @@ run-icestorm:
 
 clean:
 	$(RM) *.log *.mp3
-	$(RM) -r __pycache__ IceStorm db
+	$(RM) -r __pycache__ IceStorm db downloads
+	clear

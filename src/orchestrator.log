@@ -1,5 +1,0 @@
-53D2CE91-4846-4FFA-B584-6FA6A161180A -t -e 1.1:tcp -h 192.168.1.125 -p 42385 -t 60000
-[ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[ORCHESTRATOR] Using IceStorm in: IceStorm.TopicManager.Proxy
-[ORCHESTRATOR] Hi rookie!

@@ -22,7 +22,7 @@ __license__ = 'GPL'
 
 class OrchestratorServer(Ice.Application):
     '''
-    Orchestrator creator
+    Orchestrator server
     '''
 
     def __init__(self):
@@ -94,12 +94,16 @@ class OrchestratorServer(Ice.Application):
         orchestrator_proxy = adapter.addWithUUID(servant_orchestrator)
         servant_orchestrator.orchestrator = self
 
-        # Show proxy to downloader
+        # Show proxy
         print(orchestrator_proxy, flush=True)
 
-        downloader_proxy = broker.stringToProxy(argv[1])
-        downloader = TrawlNet.DownloaderPrx.checkedCast(downloader_proxy)
-        servant_orchestrator.downloader = downloader
+        downloader_factory_proxy = broker.stringToProxy(argv[1])
+        downloader_factory = TrawlNet.DownloaderFactoryPrx.checkedCast(downloader_factory_proxy)
+        servant_orchestrator.downloader_factory = downloader_factory
+        
+        transfer_factory_proxy = broker.stringToProxy(argv[2])
+        transfer_factory = TrawlNet.TransferFactoryPrx.checkedCast(transfer_factory_proxy)
+        servant_orchestrator.transfer_factory = transfer_factory
 
         ######## UPDATER SERVANT ########
         servant_updater = UpdateEventI()
@@ -143,10 +147,9 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         Class constructor
         '''
-
         self.orchestrator = None
-        self.downloader = None
-        self.servant = None
+        self.downloader_factory = None
+        self.transfer_factory = None
 
     def announce(self, other, current=None):
         '''
@@ -166,7 +169,7 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         Sends a download task to a downloader
         '''
-
+        
         video_hash = hashlib.sha256(generate_id(url).encode()).hexdigest()
 
         if video_hash in self.orchestrator.files:
@@ -176,10 +179,13 @@ class OrchestratorI(TrawlNet.Orchestrator):
             file_info.hash = video_hash
             return file_info
         else:
-            if not self.downloader:
+            downloader = self.downloader_factory.create()
+            if not downloader:
                 raise DownloadError(
-                    '[ORCHESTRATOR] Error: invalid downloader proxy')
-            return self.downloader.addDownloadTask(url)
+                    '[ORCHESTRATOR] Error: error creating downloader')
+            file_info = downloader.addDownloadTask(url)
+            downloader.destroy()
+            return file_info
 
     def getFileList(self, current=None):
         '''
@@ -195,6 +201,12 @@ class OrchestratorI(TrawlNet.Orchestrator):
             file_list.append(file_info)
 
         return file_list
+    
+    def getFile(self, file_name, current=None):
+        '''
+        Returns a transfer for a specific file
+        '''
+        return self.transfer_factory.create(file_name)
 
 
 class OrchestratorEventI(TrawlNet.OrchestratorEvent):
