@@ -185,6 +185,13 @@ class OrchestratorI(TrawlNet.Orchestrator):
                     '[ORCHESTRATOR] Error: error creating downloader')
             file_info = downloader.addDownloadTask(url)
             downloader.destroy()
+            
+            # Inform to the rest of orchestrators
+            for other in self.orchestrator.orchestrators:
+                other_list = other.getFileList()
+                if file_info not in other_list:
+                    other_list.append(file_info)
+            
             return file_info
 
     def getFileList(self, current=None):
@@ -244,7 +251,7 @@ class UpdateEventI(TrawlNet.UpdateEvent):
         '''
 
         if not self.orchestrator:
-            raise DownloadError('[UPDATER] Error getting orchestrator')
+            raise RuntimeError('[UPDATER] Error getting orchestrator')
 
         if file_info.hash not in self.orchestrator.files:
             print('[UPDATER] New file named {0}, with hash = {1}'.format(
