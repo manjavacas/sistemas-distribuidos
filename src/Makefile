@@ -1,27 +1,43 @@
 #!/usr/bin/make -f
 # -*- mode:makefile -*-
 
-
-all: clean \
-	start
-
-start:
-	$(MAKE) run-icestorm
-	echo "icestorm running..."
-	sleep 1
-	$(MAKE) run-server
-	echo "server running..."
-
-run-server:
-	gnome-terminal -- bash -c \
-	"./run_server.sh; bash"
-
-run-icestorm:
-	mkdir -p IceStorm/
-	gnome-terminal -- bash -c \
-	"./run_icestorm.sh; bash"
+all:
 
 clean:
-	$(RM) *.log *.mp3
-	$(RM) -r __pycache__ IceStorm db downloads
-	clear
+	$(RM) -r __pycache__
+	$(RM) -r /tmp/db
+	$(RM) -r /tmp/YoutubeDownloaderApp
+
+run: clean
+	$(MAKE) app-workspace
+	$(MAKE) run-registry-node &
+	sleep 2
+	$(MAKE) run-downloads-node &
+	sleep 2
+	$(MAKE) run-orchestrator-node
+
+run-client-download:
+	echo "Añade la ejecución del cliente para realizar una descarga"
+
+run-client-transfer:
+	echo "Añade la ejecución del cliente para realizar una transferencia"
+
+run-client-list:
+	echo "Añade la ejecución del cliente para obtener la lista de canciones"
+
+run-registry-node: /tmp/db/registry /tmp/db/node1/servers 
+	icegridnode --Ice.Config=registry-node.config
+
+run-orchestrator-node: /tmp/db/node2/servers 
+	icegridnode --Ice.Config=orchestrator-node.config
+
+run-downloads-node: /tmp/db/node3/servers 
+	icegridnode --Ice.Config=downloads-node.config
+
+app-workspace: /tmp/YoutubeDownloaderApp
+	cp trawlnet.ice orchestrator.py downloader_factory.py \
+	transfer_factory.py exceptions.py /tmp/YoutubeDownloaderApp
+	icepatch2calc /tmp/YoutubeDownloaderApp
+
+/tmp/%:
+	mkdir -p $@

@@ -1,6 +1,0 @@
-344549D0-27DA-48FB-86D0-6B34631293CA -t -e 1.1:tcp -h 192.168.1.127 -p 45243 -t 60000
-Using IceStorm in: IceStorm.TopicManager.Proxy
-[DOWNLOADER-FACTORY] New downloader!
-[DOWNLOADER] Received download task: https://www.youtube.com/watch?v=hTWKbfoikeg
-[DOWNLOADER] The file Nirvana - Smells Like Teen Spirit.mp3 has been downloaded
-[DOWNLOADER] Downloader destroyed

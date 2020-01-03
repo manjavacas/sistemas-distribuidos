@@ -1,8 +1,15 @@
-#!/bin/bash
+#!/bin/sh
+#
 
-# Usage: ./run_client.sh <URL> <FILENAME>
+echo "Downloading audio..."
+./client.py --download <url> \
+--Ice.Config=client.config
 
-CONFIG_CLIENT=client.config
+echo ""
+echo "List request..."
+./client.py --Ice.Config=client.config
 
-./client.py "$(head -1 orchestrator.log)" --download $1 --Ice.Config=$CONFIG_CLIENT
-./client.py "$(head -1 orchestrator.log)"
+echo ""
+echo "Init transfer..."
+./client.py --transfer <file_name> \
+--Ice.Config=client.config

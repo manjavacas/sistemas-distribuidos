@@ -30,17 +30,17 @@ class DownloaderServer(Ice.Application):
 
     def get_topic_manager(self):
         '''
-        Obtains topic manager
+        Obtains the topic manager
         '''
 
-        key = 'IceStorm.TopicManager.Proxy'
-        proxy = self.communicator().propertyToProxy(key)
+        key = 'YoutubeDownloaderApp.IceStorm/TopicManager'
+        proxy = self.communicator().stringToProxy(key)
 
         if proxy is None:
-            print('[ÐOWNLOADER] Error: topic key not set')
+            print('[DOWNLOADER] Error: topic key not set')
             return None
 
-        print('Using IceStorm in: ' + key)
+        print('[DOWNLOADER] Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
     def get_topic(self, topic_name):
@@ -65,12 +65,15 @@ class DownloaderServer(Ice.Application):
         '''
         Run method
         '''
-        
-        broker = self.communicator()
 
+        broker = self.communicator()
+        properties = broker.getProperties()
+        
         servant = DownloaderFactoryI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
-        proxy = adapter.addWithUUID(servant)
+        factory_id = properties.getProperty('DownloaderFactoryIdentity')
+        proxy = adapter.add(servant, broker.stringToIdentity(factory_id))
+
 
         # Show proxy
         print(proxy, flush=True)

@@ -31,6 +31,23 @@ class OrchestratorServer(Ice.Application):
         '''
         self.files = {}
         self.orchestrators = []
+        
+    
+    def get_topic_manager(self):
+        '''
+        Obtains the topic manager
+        '''
+
+        key = 'YoutubeDownloaderApp.IceStorm/TopicManager'
+        proxy = self.communicator().stringToProxy(key)
+
+        if proxy is None:
+            print('[ORCHESTRATOR] Error: topic key not set')
+            return None
+
+        print('[ORCHESTRATOR] Using IceStorm in: ' + key)
+        return IceStorm.TopicManagerPrx.checkedCast(proxy)
+
 
     def get_topic(self, topic_name):
         '''
@@ -50,20 +67,6 @@ class OrchestratorServer(Ice.Application):
 
         return topic
 
-    def get_topic_manager(self):
-        '''
-        Obtains the topic manager
-        '''
-
-        key = 'IceStorm.TopicManager.Proxy'
-        proxy = self.communicator().propertyToProxy(key)
-
-        if proxy is None:
-            print('[ORCHESTRATOR] Error: topic key not set')
-            return None
-
-        print('[ORCHESTRATOR] Using IceStorm in: ' + key)
-        return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
     def subscribe_to(self, topic_name, subscriber):
         '''
@@ -87,11 +90,14 @@ class OrchestratorServer(Ice.Application):
         '''
 
         broker = self.communicator()
+        properties = broker.getProperties()
 
         ######## ORCHESTRATOR SERVANT ########
         servant_orchestrator = OrchestratorI()
         adapter = broker.createObjectAdapter('OrchestratorAdapter')
-        orchestrator_proxy = adapter.addWithUUID(servant_orchestrator)
+        orchestrator_id = properties.getProperty('OrchestratorIdentity')
+        orchestrator_proxy = adapter.add(servant_orchestrator, broker.stringToIdentity(orchestrator_id))
+        
         servant_orchestrator.orchestrator = self
 
         # Show proxy
@@ -107,15 +113,17 @@ class OrchestratorServer(Ice.Application):
 
         ######## UPDATER SERVANT ########
         servant_updater = UpdateEventI()
-        broker.createObjectAdapter('UpdaterAdapter')
-        updater_proxy = adapter.addWithUUID(servant_updater)
+        updater_id = properties.getProperty('UpdaterIdentity')
+        updater_proxy = adapter.add(servant_updater, broker.stringToIdentity(updater_id))
+        
         self.subscribe_to('UpdateEvents', updater_proxy)
         servant_updater.orchestrator = self
 
         ######## GREETER SERVANT ########
         servant_greeter = OrchestratorEventI()
-        broker.createObjectAdapter('GreeterAdapter')
-        greeter_proxy = adapter.addWithUUID(servant_greeter)
+        greeter_id = properties.getProperty('GreeterIdentity')
+        greeter_proxy = adapter.add(servant_greeter, broker.stringToIdentity(greeter_id))
+        
         self.subscribe_to('OrchestratorSync', greeter_proxy)
 
         # Publish in OrchestratorSync topic

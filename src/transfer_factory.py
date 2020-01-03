@@ -26,10 +26,12 @@ class TransferServer(Ice.Application):
         '''
 
         broker = self.communicator()
-
+        properties = broker.getProperties()
+        
         servant = TransferFactoryI()
         adapter = broker.createObjectAdapter('TransferAdapter')
-        proxy = adapter.addWithUUID(servant)
+        factory_id = properties.getProperty('TransferFactoryIdentity')
+        proxy = adapter.add(servant, broker.stringToIdentity(factory_id))
 
         # Show proxy
         print('{}'.format(proxy), flush=True)

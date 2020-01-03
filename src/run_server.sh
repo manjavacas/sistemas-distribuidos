@@ -1,19 +1,28 @@
-#!/bin/bash
+#!/bin/sh
+#
 
-touch downloader.log transfer.log orchestrator.log
+echo "Creating directories in /tmp..."
+mkdir -p /tmp/YoutubeDownloaderApp
+cp trawlnet.ice orchestrator.py downloader_factory.py transfer_factory.py \
+utils.py /tmp/YoutubeDownloaderApp
+echo "Exec icepatch2calc..."
+icepatch2calc /tmp/YoutubeDownloaderApp
 
-CONFIG_DOWNLOADER_FACTORY=downloader.config
-CONFIG_TRANSFER_FACTORY=transfer.config
-CONFIG_ORCHESTRATOR=orchestrator.config
+echo "Exec registry-node"
+mkdir -p /tmp/db/registry
+mkdir -p /tmp/db/registry-node/servers
+icegridnode --Ice.Config=registry-node.config &
+sleep 2
 
-./downloader_factory.py --Ice.Config=$CONFIG_DOWNLOADER_FACTORY > downloader.log &
-PID1=$!
+echo "Exec downloads-node"
+mkdir -p /tmp/db/downloads-node/servers
+icegridnode --Ice.Config=downloads-node.config &
+sleep 2
 
-./transfer_factory.py --Ice.Config=$CONFIG_TRANSFER_FACTORY > transfer.log &
-PID2=$!
+echo "Exec orchestrator-node"
+mkdir -p /tmp/db/orchestrator-node/servers
+icegridnode --Ice.Config=orchestrator-node.config
 
-sleep 1
-./orchestrator.py "$(head -1 downloader.log)" "$(head -1 transfer.log)" --Ice.Config=$CONFIG_ORCHESTRATOR > orchestrator.log
-
-echo "Shutting down..."
-kill -KILL $PID1 $PID2
+echo "Shoutting down..."
+sleep 2
+rm $OUT
