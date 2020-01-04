@@ -44,13 +44,14 @@
       </service-template>
       <server-template id="DownloaderFactory">
          <parameter name="index"/>
-         <server id="DownloaderFactory${index}" activation="always" exe="./downloader_factory.py" pwd="${application.distrib}">
+         <server id="DownloaderFactory${index}" activation="manual" exe="./downloader_factory.py" pwd="${application.distrib}">
             <properties>
                <property name="Ice.StdOut" value="${application.distrib}/downloader-factory-out.txt"/>
                <property name="Ice.ProgramName" value="${server}.DownloaderFactory${index}"/>
+               <property name="DownloaderFactoryIdentity" value="downloader"/>
             </properties>
             <adapter name="DownloaderAdapter" endpoints="default" id="${server}.DownloaderAdapter">
-               <allocatable identity="downloader-factory${index}" type="::TrawlNet::DownloaderFactory" property="identity"/>
+               <object identity="downloader-factory${index}" type="::TrawlNet::DownloaderFactory" property="identity"/>
             </adapter>
          </server>
       </server-template>
@@ -110,6 +111,7 @@
             <properties>
                <property name="Ice.StdOut" value="${application.distrib}/orchestrator-out.txt"/>
                <property name="Ice.ProgramName" value="${server}.Orchestrator${index}"/>
+               <property name="OrchestratorIdentity" value="orchestrator"/>
             </properties>
             <adapter name="OrchestratorAdapter" endpoints="default" id="${server}.OrchestratorAdapter">
                <object identity="orchestrator${index}" type="::TrawlNet::Orchestrator" property="identity"/>
@@ -118,13 +120,14 @@
       </server-template>
       <server-template id="TransferFactory">
          <parameter name="index"/>
-         <server id="TransferFactory${index}" activation="always" exe="./transfer_factory.py" pwd="${application.distrib}">
+         <server id="TransferFactory${index}" activation="manual" exe="./transfer_factory.py" pwd="${application.distrib}">
             <properties>
                <property name="Ice.StdOut" value="${application.distrib}/transfer-factory-out.txt"/>
                <property name="Ice.ProgramName" value="${server}.TransferFactory${index}"/>
+               <property name="TransferFactoryIdentity" value="transfer"/>
             </properties>
             <adapter name="TransferAdapter" endpoints="default" id="${server}.TransferAdapter">
-               <allocatable identity="transfer-factory${index}" type="::TrawlNet::TransferFactory" property="identity"/>
+               <object identity="transfer-factory${index}" type="::TrawlNet::TransferFactory" property="identity"/>
             </adapter>
          </server>
       </server-template>

@@ -2,7 +2,7 @@
 #
 
 echo "Downloading audio..."
-./client.py --download <url> \
+./client.py --download "https://www.youtube.com/watch?v=SSbBvKaM6sk" \
 --Ice.Config=client.config
 
 echo ""
