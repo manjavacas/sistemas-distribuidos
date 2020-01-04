@@ -42,6 +42,18 @@
             <adapter name="${service}.TopicManager" endpoints="${topic-manager-endpoints}" id="${instance-name}${node-id}.TopicManager" replica-group="${topic-manager-replica-group}"/>
          </service>
       </service-template>
+      <server-template id="DownloaderFactory">
+         <parameter name="index"/>
+         <server id="DownloaderFactory${index}" activation="always" exe="./downloader_factory.py" pwd="${application.distrib}">
+            <properties>
+               <property name="Ice.StdOut" value="${application.distrib}/downloader-factory-out.txt"/>
+               <property name="Ice.ProgramName" value="${server}.DownloaderFactory${index}"/>
+            </properties>
+            <adapter name="DownloaderAdapter" endpoints="default" id="${server}.DownloaderAdapter">
+               <allocatable identity="downloader-factory${index}" type="::TrawlNet::DownloaderFactory" property="identity"/>
+            </adapter>
+         </server>
+      </server-template>
       <server-template id="Glacier2">
          <parameter name="instance-name" default="${application}.Glacier2"/>
          <parameter name="client-endpoints"/>
@@ -92,46 +104,45 @@
             <service-instance template="IceStorm-HA" instance-name="${instance-name}" node-id="${node-id}" topic-manager-endpoints="${topic-manager-endpoints}" publish-endpoints="${publish-endpoints}" node-endpoints="${node-endpoints}" flush-timeout="${flush-timeout}" publish-replica-group="${publish-replica-group}" topic-manager-replica-group="${topic-manager-replica-group}"/>
          </icebox>
       </server-template>
-      <node name="node1">
+      <server-template id="Orchestrator">
+         <parameter name="index"/>
+         <server id="Orchestrator${index}" activation="on-demand" exe="./orchestrator.py" pwd="${application.distrib}">
+            <properties>
+               <property name="Ice.StdOut" value="${application.distrib}/orchestrator-out.txt"/>
+               <property name="Ice.ProgramName" value="${server}.Orchestrator${index}"/>
+            </properties>
+            <adapter name="OrchestratorAdapter" endpoints="default" id="${server}.OrchestratorAdapter">
+               <object identity="orchestrator${index}" type="::TrawlNet::Orchestrator" property="identity"/>
+            </adapter>
+         </server>
+      </server-template>
+      <server-template id="TransferFactory">
+         <parameter name="index"/>
+         <server id="TransferFactory${index}" activation="always" exe="./transfer_factory.py" pwd="${application.distrib}">
+            <properties>
+               <property name="Ice.StdOut" value="${application.distrib}/transfer-factory-out.txt"/>
+               <property name="Ice.ProgramName" value="${server}.TransferFactory${index}"/>
+            </properties>
+            <adapter name="TransferAdapter" endpoints="default" id="${server}.TransferAdapter">
+               <allocatable identity="transfer-factory${index}" type="::TrawlNet::TransferFactory" property="identity"/>
+            </adapter>
+         </server>
+      </server-template>
+      <node name="downloads-node">
+         <description>Includes downloader and transfer factories</description>
+         <server-instance template="DownloaderFactory" index="1"/>
+         <server-instance template="TransferFactory" index="1"/>
+      </node>
+      <node name="orchestrator-node">
+         <description>Includes orchestrators</description>
+         <server-instance template="Orchestrator" index="1"/>
+         <server-instance template="Orchestrator" index="2"/>
+         <server-instance template="Orchestrator" index="3"/>
+      </node>
+      <node name="registry-node">
          <description>Includes registry, icepatch2 and icestorm</description>
          <server-instance template="IcePatch2" directory="/tmp/YoutubeDownloaderApp"/>
          <server-instance template="IceStorm"/>
-      </node>
-      <node name="node2">
-         <description>Includes orchestrators</description>
-         <server id="Orchestrator1" activation="manual" exe="./orchestrator.py" pwd="${application.distrib}">
-            <properties>
-               <property name="Ice.StdOut" value="${application.distrib}/orchestrator1-out.txt"/>
-            </properties>
-            <adapter name="OrchestratorAdapter" endpoints="tcp" id="${server}.OrchestratorAdapter"/>
-         </server>
-         <server id="Orchestrator2" activation="manual" exe="./orchestrator.py" pwd="${application.distrib}">
-            <properties>
-               <property name="Ice.StdOut" value="${application.distrib}/orchestrator2-out.txt"/>
-            </properties>
-            <adapter name="OrchestratorAdapter" endpoints="tcp" id="${server}.OrchestratorAdapter"/>
-         </server>
-         <server id="Orchestrator3" activation="manual" exe="./orchestrator.py" pwd="${application.distrib}">
-            <properties>
-               <property name="Ice.StdOut" value="${application.distrib}/orchestrator3-out.txt"/>
-            </properties>
-            <adapter name="OrchestratorAdapter" endpoints="tcp" id="${server}.OrchestratorAdapter"/>
-         </server>
-      </node>
-      <node name="node3">
-         <description>Includes downloader and transfer factories</description>
-         <server id="DownloaderFactory" activation="manual" exe="./downloader_factory.py" pwd="${application.distrib}">
-            <properties>
-               <property name="Ice.StdOut" value="${application.distrib}/downloader-factory-out.txt"/>
-            </properties>
-            <adapter name="DownloaderAdapter" endpoints="tcp" id="${server}.DownloaderAdapter"/>
-         </server>
-         <server id="TransferFactory" activation="manual" exe="./transfer_factory.py" pwd="${application.distrib}">
-            <properties>
-               <property name="Ice.StdOut" value="${application.distrib}/transfer-factory-out.txt"/>
-            </properties>
-            <adapter name="TransferAdapter" endpoints="tcp" id="${server}.TransferAdapter"/>
-         </server>
       </node>
    </application>
 </icegrid>

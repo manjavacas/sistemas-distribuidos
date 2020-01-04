@@ -25,13 +25,13 @@ run-client-transfer:
 run-client-list:
 	echo "Añade la ejecución del cliente para obtener la lista de canciones"
 
-run-registry-node: /tmp/db/registry /tmp/db/node1/servers 
+run-registry-node: /tmp/db/registry /tmp/db/registry-node/servers 
 	icegridnode --Ice.Config=registry-node.config
 
-run-orchestrator-node: /tmp/db/node2/servers 
+run-orchestrator-node: /tmp/db/orchestrator-node/servers 
 	icegridnode --Ice.Config=orchestrator-node.config
 
-run-downloads-node: /tmp/db/node3/servers 
+run-downloads-node: /tmp/db/downloads-node/servers 
 	icegridnode --Ice.Config=downloads-node.config
 
 app-workspace: /tmp/YoutubeDownloaderApp
