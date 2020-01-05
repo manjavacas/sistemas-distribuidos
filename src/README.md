@@ -1,3 +1,9 @@
-    - $ ./client.py PROXY --download URL
-    - $ ./client.py PROXY --transfer FILENAME
-    - $ ./client.py PROXY
+# Execution #
+
+  ## Run server ##
+
+    ./run_server
+
+  ## Run client ##
+
+    ./run_client <URL>
