@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-Youtube video downloader
+Youtube video downloaders factory
 '''
 
 from exceptions import DownloadError
@@ -14,7 +14,6 @@ import os
 import Ice
 import youtube_dl
 import IceStorm
-import IceGrid
 
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
@@ -68,7 +67,7 @@ class DownloaderServer(Ice.Application):
 
         broker = self.communicator()
         properties = broker.getProperties()
-        
+
         servant = DownloaderFactoryI()
         adapter = broker.createObjectAdapter('DownloaderAdapter')
         factory_id = properties.getProperty('DownloaderFactoryIdentity')
@@ -155,7 +154,7 @@ class DownloaderFactoryI(TrawlNet.DownloaderFactory):
         '''
         Creates a new downloader
         '''
-        
+
         servant = DownloaderI()
         proxy = current.adapter.addWithUUID(servant)
 

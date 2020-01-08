@@ -79,7 +79,7 @@ class Client(Ice.Application):
         if not self.orchestrator:
             raise RuntimeError('[CLIENT] Error: invalid orchestrator proxy')
 
-        
+
         # Download file: client.py <proxy> --download <url> <config>
         if options.download != None:
             url = argv[3]
@@ -99,7 +99,7 @@ class Client(Ice.Application):
         else:
             print('[CLIENT] Requesting list of available files...')
             print(str(self.orchestrator.getFileList()))
-        
+
         return 0
 
 

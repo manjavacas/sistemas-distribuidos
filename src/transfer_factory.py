@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+'''
+File transfer factory
+'''
+
 import binascii
 import sys
 import os
 
-import IceGrid
 import Ice
 
 Ice.loadSlice('trawlnet.ice')
@@ -27,7 +30,7 @@ class TransferServer(Ice.Application):
 
         broker = self.communicator()
         properties = broker.getProperties()
-        
+
         servant = TransferFactoryI()
         adapter = broker.createObjectAdapter('TransferAdapter')
         factory_id = properties.getProperty('TransferFactoryIdentity')
@@ -44,6 +47,9 @@ class TransferServer(Ice.Application):
 
 
 class TransferFactoryI(TrawlNet.TransferFactory):
+    '''
+    Transfer factory
+    '''
     def create(self, file_name, current):
         '''
         Creates transfers

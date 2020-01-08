@@ -31,8 +31,8 @@ class OrchestratorServer(Ice.Application):
         '''
         self.files = {}
         self.orchestrators = []
-        
-    
+
+
     def get_topic_manager(self):
         '''
         Obtains the topic manager
@@ -45,7 +45,6 @@ class OrchestratorServer(Ice.Application):
             print('[ORCHESTRATOR] Error: topic key not set')
             return None
 
-        print('[ORCHESTRATOR] Using IceStorm in: ' + key)
         return IceStorm.TopicManagerPrx.checkedCast(proxy)
 
 
@@ -83,6 +82,8 @@ class OrchestratorServer(Ice.Application):
             topic = topic_mgr.create(topic_name)
 
         topic.subscribeAndGetPublisher({}, subscriber)
+        print('[ORCHESTRATOR] ' + str(subscriber) + ' is now subscribed to ' + topic_name)
+
 
     def run(self, argv):
         '''
@@ -96,17 +97,19 @@ class OrchestratorServer(Ice.Application):
         servant_orchestrator = OrchestratorI()
         adapter = broker.createObjectAdapter('OrchestratorAdapter')
         orchestrator_id = properties.getProperty('OrchestratorIdentity')
-        orchestrator_proxy = adapter.add(servant_orchestrator, broker.stringToIdentity(orchestrator_id))
-        
+        orchestrator_proxy = adapter.add(servant_orchestrator,
+                                         broker.stringToIdentity(orchestrator_id))
+
         servant_orchestrator.orchestrator = self
 
         # Show proxy
         print(orchestrator_proxy, flush=True)
 
+        # Get factories
         downloader_factory_proxy = broker.stringToProxy(argv[1])
         downloader_factory = TrawlNet.DownloaderFactoryPrx.checkedCast(downloader_factory_proxy)
         servant_orchestrator.downloader_factory = downloader_factory
-        
+
         transfer_factory_proxy = broker.stringToProxy(argv[2])
         transfer_factory = TrawlNet.TransferFactoryPrx.checkedCast(transfer_factory_proxy)
         servant_orchestrator.transfer_factory = transfer_factory
@@ -115,16 +118,22 @@ class OrchestratorServer(Ice.Application):
         servant_updater = UpdateEventI()
         updater_id = properties.getProperty('UpdaterIdentity')
         updater_proxy = adapter.add(servant_updater, broker.stringToIdentity(updater_id))
-        
-        self.subscribe_to('UpdateEvents', updater_proxy)
+
+        # Get direct proxy for topic subscription
+        id_ = updater_proxy.ice_getIdentity()
+        updater_direct_proxy = adapter.createDirectProxy(id_)
+        self.subscribe_to('UpdateEvents', updater_direct_proxy)
         servant_updater.orchestrator = self
 
         ######## GREETER SERVANT ########
         servant_greeter = OrchestratorEventI()
         greeter_id = properties.getProperty('GreeterIdentity')
         greeter_proxy = adapter.add(servant_greeter, broker.stringToIdentity(greeter_id))
-        
-        self.subscribe_to('OrchestratorSync', greeter_proxy)
+
+        # Get direct proxy for topic subscription
+        id_ = greeter_proxy.ice_getIdentity()
+        greeter_direct_proxy = adapter.createDirectProxy(id_)
+        self.subscribe_to('OrchestratorSync', greeter_direct_proxy)
 
         # Publish in OrchestratorSync topic
         servant_greeter.orchestrator = TrawlNet.OrchestratorPrx.uncheckedCast(
@@ -177,8 +186,8 @@ class OrchestratorI(TrawlNet.Orchestrator):
         '''
         Sends a download task to a downloader
         '''
-        
-        video_hash = hashlib.sha256(generate_id(url).encode()).hexdigest()
+
+        video_hash = hashlib.sha256(get_title(url).encode()).hexdigest()
 
         if video_hash in self.orchestrator.files:
             print('[ORCHESTRATOR] The file has been previously downloaded')
@@ -193,13 +202,13 @@ class OrchestratorI(TrawlNet.Orchestrator):
                     '[ORCHESTRATOR] Error: error creating downloader')
             file_info = downloader.addDownloadTask(url)
             downloader.destroy()
-            
+
             # Inform to the rest of orchestrators
             for other in self.orchestrator.orchestrators:
                 other_list = other.getFileList()
                 if file_info not in other_list:
                     other_list.append(file_info)
-            
+
             return file_info
 
     def getFileList(self, current=None):
@@ -216,7 +225,7 @@ class OrchestratorI(TrawlNet.Orchestrator):
             file_list.append(file_info)
 
         return file_list
-    
+
     def getFile(self, file_name, current=None):
         '''
         Returns a transfer for a specific file
@@ -267,15 +276,15 @@ class UpdateEventI(TrawlNet.UpdateEvent):
             self.orchestrator.files[file_info.hash] = file_info.name
 
 
-def generate_id(url):
+def get_title(url):
     '''
-    Gets a video id from its url
+    Gets a video title from its url
     '''
 
     with youtube_dl.YoutubeDL() as ydl:
         info_dict = ydl.extract_info(url, download=False)
 
-    return info_dict['id']
+    return info_dict['title']
 
 
 if __name__ == '__main__':
