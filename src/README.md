@@ -2,8 +2,12 @@
 
   ## Run server ##
 
-    ./run_server
+  Run orchestrators, factories and Ice services:
+
+    `./run_server`
 
   ## Run client ##
 
-    ./run_client <URL>
+  Edit <url> and <filename> params in the script and run:
+
+    `./run_client`
