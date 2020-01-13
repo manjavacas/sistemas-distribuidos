@@ -27,6 +27,9 @@ DOWNLOADS_DIRECTORY = os.path.join(APP_DIRECTORY, 'downloads')
 class Client(Ice.Application):
     '''
     Client class
+	./client.py orchestrator --download <url> <Ice.Config>
+	./client.py orchestrator --transfer <filename> <Ice.Config>
+	./client.py orchestrator <Ice.Config>
     '''
 
     def transfer_request(self, file_name):
