@@ -8,6 +8,6 @@
 
   ## Run client ##
 
-  Edit <url> and <filename> params in the script and run:
+  Edit `url` and `filename` params in the script and run:
 
     ./run_client
