@@ -21,6 +21,8 @@ import TrawlNet
 __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
+DOWNLOADS_DIRECTORY = '/tmp/trawlnet_cache/downloads'
+
 
 class DownloaderServer(Ice.Application):
     '''
@@ -198,7 +200,7 @@ _YOUTUBEDL_OPTS_ = {
     'logger': NullLogger()
 }
 
-def download_mp3(url, destination='./downloads'):
+def download_mp3(url, destination=DOWNLOADS_DIRECTORY):
     '''
     Synchronous download from YouTube
     '''

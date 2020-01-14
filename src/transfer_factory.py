@@ -14,8 +14,7 @@ import Ice
 Ice.loadSlice('trawlnet.ice')
 import TrawlNet
 
-APP_DIRECTORY = './'
-DOWNLOADS_DIRECTORY = os.path.join(APP_DIRECTORY, 'downloads')
+DOWNLOADS_DIRECTORY = '/tmp/trawlnet_cache/downloads'
 
 
 class TransferServer(Ice.Application):

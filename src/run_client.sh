@@ -7,7 +7,8 @@ echo "Downloading audio..."
 
 echo ""
 echo "List request..."
-./client.py "orchestrator2 -t -e 1.1 @ ReplicatedOrchestratorAdapter" --Ice.Config=client.config
+./client.py "orchestrator2 -t -e 1.1 @ ReplicatedOrchestratorAdapter" \
+--Ice.Config=client.config
 
 echo ""
 echo "Init transfer..."

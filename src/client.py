@@ -20,8 +20,7 @@ import TrawlNet
 __author__ = 'Antonio Manjavacas'
 __license__ = 'GPL'
 
-APP_DIRECTORY = './'
-DOWNLOADS_DIRECTORY = os.path.join(APP_DIRECTORY, 'downloads')
+DOWNLOADS_DIRECTORY = '/tmp/trawlnet_cache/downloads'
 
 
 class Client(Ice.Application):
@@ -81,7 +80,6 @@ class Client(Ice.Application):
 
         if not self.orchestrator:
             raise RuntimeError('[CLIENT] Error: invalid orchestrator proxy')
-
 
         # Download file: client.py <proxy> --download <url> <config>
         if options.download != None:
