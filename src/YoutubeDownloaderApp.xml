@@ -113,6 +113,7 @@
             <properties>
                <property name="Ice.StdOut" value="${application.distrib}/orchestrator${index}-out.txt"/>
                <property name="Ice.ProgramName" value="${server}.Orchestrator${index}"/>
+               <property name="Identity" value="orchestrator"/>
                <property name="OrchestratorIdentity" value="orchestrator${index}"/>
                <property name="UpdaterIdentity" value="updater${index}"/>
                <property name="GreeterIdentity" value="greeter${index}"/>
@@ -136,6 +137,7 @@
          </server>
       </server-template>
       <replica-group id="ReplicatedOrchestratorAdapter">
+         <description>Replica group for orchestrators</description>
          <load-balancing type="round-robin" n-replicas="0"/>
          <object identity="orchestrator" type="::TrawlNet::Orchestrator"/>
       </replica-group>
