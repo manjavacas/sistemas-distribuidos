@@ -7,6 +7,7 @@ clean:
 	$(RM) -r __pycache__
 	$(RM) -r /tmp/db
 	$(RM) -r /tmp/YoutubeDownloaderApp
+	$(RM) -r /tmp/trawlnet_cache
 
 run: clean
 	$(MAKE) app-workspace
@@ -17,10 +18,10 @@ run: clean
 	$(MAKE) run-orchestrator-node
 
 run-client-download:
-	./client.py orchestrator --download <url> --Ice.Config=client.config
+	./client.py orchestrator --download "https://www.youtube.com/watch?v=SSbBvKaM6sk" --Ice.Config=client.config
 
 run-client-transfer:
-	./client.py orchestrator --transfer <filename> --Ice.Config=client.config
+	./client.py orchestrator --transfer "Blur - Song 2.mp3" --Ice.Config=client.config
 
 run-client-list:
 	./client.py orchestrator --Ice.Config=client.config

@@ -44,7 +44,7 @@
       </service-template>
       <server-template id="DownloaderFactory">
          <parameter name="index"/>
-         <server id="DownloaderFactory${index}" activation="always" exe="./downloader_factory.py" pwd="${application.distrib}">
+         <server id="DownloaderFactory${index}" activation="on-demand" exe="./downloader_factory.py" pwd="${application.distrib}">
             <properties>
                <property name="Ice.StdOut" value="${application.distrib}/downloader-factory-out.txt"/>
                <property name="Ice.ProgramName" value="${server}.DownloaderFactory${index}"/>
@@ -125,7 +125,7 @@
       </server-template>
       <server-template id="TransferFactory">
          <parameter name="index"/>
-         <server id="TransferFactory${index}" activation="always" exe="./transfer_factory.py" pwd="${application.distrib}">
+         <server id="TransferFactory${index}" activation="on-demand" exe="./transfer_factory.py" pwd="${application.distrib}">
             <properties>
                <property name="Ice.StdOut" value="${application.distrib}/transfer-factory-out.txt"/>
                <property name="Ice.ProgramName" value="${server}.TransferFactory${index}"/>

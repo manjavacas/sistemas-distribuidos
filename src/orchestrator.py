@@ -96,7 +96,7 @@ class OrchestratorServer(Ice.Application):
         ######## ORCHESTRATOR SERVANT ########
         servant_orchestrator = OrchestratorI()
         adapter = broker.createObjectAdapter('OrchestratorAdapter')
-        orchestrator_id = properties.getProperty('OrchestratorIdentity')
+        orchestrator_id = properties.getProperty('Identity')
         orchestrator_proxy = adapter.add(servant_orchestrator,
                                          broker.stringToIdentity(orchestrator_id))
 
@@ -151,6 +151,10 @@ class OrchestratorServer(Ice.Application):
 
         self.shutdownOnInterrupt()
         broker.waitForShutdown()
+
+        # Unsubscribe
+        self.get_topic('UpdateEvents').unsubscribe(updater_direct_proxy)
+        self.get_topic('OrchestratorSync').unsubscribe(greeter_direct_proxy)
 
         return 0
 
